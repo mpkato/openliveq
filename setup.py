@@ -22,8 +22,7 @@ setup(
     license     = "MIT License",
     url = "https://github.com/mpkato/openliveq",
     install_requires = [
-        'numpy'
+        'requests'
     ],
     tests_require=['pytest'],
-    cmdclass = {'test': PyTest}
 )
