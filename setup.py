@@ -25,4 +25,5 @@ setup(
         'requests'
     ],
     tests_require=['pytest'],
+    cmdclass = {'test': PyTest}
 )

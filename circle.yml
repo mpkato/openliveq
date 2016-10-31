@@ -6,6 +6,3 @@ dependencies:
         - pip install --upgrade setuptools
         - pip install --upgrade pip
         - pip install pytest
-test:
-  override:
-    - py.test
