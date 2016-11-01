@@ -4,4 +4,6 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    import openliveq as olq
+    q = olq.Question()
+    return render_template('index.html', msg=str(q))
