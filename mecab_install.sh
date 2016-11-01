@@ -3,7 +3,7 @@
 
 # Install mecab
 cd /tmp
-wget https://mecab.googlecode.com/files/mecab-0.996.tar.gz
+wget "https://drive.google.com/uc?export=download&id=0B4y35FiV1wh7cENtOXlicTFaRUE" -O mecab-0.996.tar.gz
 tar zxfv mecab-0.996.tar.gz
 cd mecab-0.996
 ./configure
@@ -16,7 +16,7 @@ sudo ldconfig
 
 # Install mecab-ipadic
 cd /tmp
-wget https://mecab.googlecode.com/files/mecab-ipadic-2.7.0-20070801.tar.gz
+wget "https://drive.google.com/uc?export=download&id=0B4y35FiV1wh7MWVlSDBCSXZMTXM" -O mecab-ipadic-2.7.0-20070801.tar.gz
 tar zxfv mecab-ipadic-2.7.0-20070801.tar.gz
 cd mecab-ipadic-2.7.0-20070801
 ./configure --with-charset=utf8
