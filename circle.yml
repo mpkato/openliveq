@@ -6,6 +6,7 @@ dependencies:
         - pip install --upgrade setuptools
         - pip install --upgrade pip
         - pip install pytest
+        - sh mecab_install.sh
 test:
   override:
     - py.test
