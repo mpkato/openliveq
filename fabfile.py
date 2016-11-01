@@ -15,4 +15,5 @@ def deploy():
             run("git archive web | tar -x -f - -C %s/current" % REMOTE_HOME)
         with cd("current"):
             run("%s/bin/python setup.py install --force" % REMOTE_PYTHON_HOME)
+            run("%s/bin/pip install -r web_requirements.txt" % REMOTE_PYTHON_HOME)
         run('touch .uwsgi_touch')
