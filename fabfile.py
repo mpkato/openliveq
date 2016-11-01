@@ -11,7 +11,7 @@ def deploy():
             run("rm -rf current")
             run("mkdir current")
         with cd("repo"):
-            run("git remote update")
+            run("git pull origin web")
             run("git archive web | tar -x -f - -C %s/current" % REMOTE_HOME)
         with cd("current"):
             run("%s/bin/python setup.py install --force" % REMOTE_PYTHON_HOME)
