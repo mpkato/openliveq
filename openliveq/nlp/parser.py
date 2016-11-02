@@ -2,9 +2,19 @@
 import MeCab
 
 class Parser(object):
+    CONTENT_POS_PREFIXES = ["形容詞", "名詞", "動詞", "副詞"]
+
     def __init__(self):
         self.tagger = MeCab.Tagger()
         self.tagger.parse("")
+
+    def word_tokenize(self, sentence):
+        '''
+        Word tokenization
+        '''
+        tokens = [w[0] for w in self._mecab_tokenize(sentence)]
+        tokens = self.normalize(tokens)
+        return tokens
 
     def noun_tokenize(self, sentence):
         '''
@@ -12,24 +22,18 @@ class Parser(object):
         '''
         tagged_tokens = self.pos_tokenize(sentence)
         nouns = self.noun_filter(tagged_tokens)
-        nouns = self.stopword_filter(nouns, key=lambda x: x[0])
-        nouns = self.normalize(nouns, key=lambda x: x[0])
+        nouns = self.normalize(nouns)
         return nouns
 
-    def normalize(self, tokens, key=lambda x: x):
+    def content_word_tokenize(self, sentence):
         '''
-        Convert tokens to lowercase
+        Extract only content words
         '''
-        return [key(token).lower() for token in tokens]
-
-    def word_tokenize(self, sentence):
-        '''
-        Word tokenization
-        '''
-        tokens = [w[0] for w in self._mecab_tokenize(sentence)]
-        tokens = self.stopword_filter(tokens)
-        tokens = self.normalize(tokens)
-        return tokens
+        tagged_tokens = self.pos_tokenize(sentence)
+        content_words = self.content_word_filter(tagged_tokens)
+        content_words = self.lemmatize(content_words)
+        content_words = self.normalize(content_words)
+        return content_words
 
     def pos_tokenize(self, sentence):
         '''
@@ -37,18 +41,39 @@ class Parser(object):
         '''
         return self._mecab_tokenize(sentence)
 
-    def stopword_filter(self, tokens, key=lambda x: x):
-        '''
-        Filter out stopword tokens (Not implemented)
-        '''
-        return tokens
-
     def noun_filter(self, tokens):
         '''
         Filter out non-noun tokens (pos starts with 名詞)
         '''
         return [token for token in tokens
             if token[1].startswith('名詞')]
+
+    def content_word_filter(self, tokens):
+        '''
+        Include function words (pos starts with CONTENT_POS_PREFIXES)
+        '''
+        return [token for token in tokens
+            if any([token[1].startswith(pos)
+                for pos in self.CONTENT_POS_PREFIXES])]
+
+    def normalize(self, tokens):
+        '''
+        Convert tokens to lowercase
+        '''
+        return [token[0].lower() for token in tokens]
+
+    def lemmatize(self, tokens):
+        '''
+        Convert tokens to original forms
+        '''
+        result = []
+        for token in tokens:
+            w = token[0]
+            fs = token[1].split(",")
+            if fs[6] != '*':
+                w = fs[6]
+            result.append((w, token[1]))
+        return result
 
     def _mecab_tokenize(self, sentence):
         '''

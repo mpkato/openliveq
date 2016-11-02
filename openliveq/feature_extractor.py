@@ -81,7 +81,8 @@ class FeatureExtractor(object):
             txts = {}
             for l in self.FIELDS:
                 txts[l] = getattr(q, l)
-            wordsets = {l: self._to_dict(self.parser.noun_tokenize(txt))
+            wordsets = {l: self._to_dict(
+                self.parser.content_word_tokenize(txt))
                 for l, txt in txts.items()}
             result[q.question_id] = wordsets
         return result
@@ -89,7 +90,8 @@ class FeatureExtractor(object):
     def parse_queries(self, queries):
         result = {}
         for q in queries:
-            wordset = self._to_dict(self.parser.noun_tokenize(q.body))
+            wordset = self._to_dict(
+                self.parser.content_word_tokenize(q.body))
             result[q.query_id] = wordset
         return result
 
