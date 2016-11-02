@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name = "openliveq",
-    packages = ["openliveq", "openliveq.nlp"],
+    packages = ["openliveq", "openliveq.nlp", "openliveq.features"],
     version = "0.0.1",
     description = "Package for NTCIR-13 OpenLiveQ",
     author = "Makoto P. Kato",

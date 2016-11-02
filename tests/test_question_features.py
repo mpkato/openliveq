@@ -1,5 +1,5 @@
 import openliveq as olq
-from openliveq.question_features import (answer_num, log_answer_num,
+from openliveq.features import (answer_num, log_answer_num,
     view_num, log_view_num, is_open, is_vote, is_solved, rank, updated_at)
 import pytest
 import os

@@ -6,7 +6,7 @@ from openliveq.features import (
 import pytest
 from math import log
 
-class TestFeatures(object):
+class TestTextualFeatures(object):
 
     def test_tf_sum(self, q, d, ff):
         res = tf_sum(q, d, ff)
