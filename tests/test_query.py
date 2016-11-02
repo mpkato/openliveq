@@ -11,6 +11,6 @@ class TestQuery(object):
         with open(filepath) as f:
             qs = olq.Query.load(f)
 
-        assert qs[0].query_id == 'OLQ-9991'
+        assert qs[0].query_id == 'OLQ-9998'
         assert qs[0].body == '野球'
-        assert len(qs) == 3
+        assert len(qs) == 2
