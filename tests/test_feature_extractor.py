@@ -20,16 +20,6 @@ class TestFeatureExtractor(object):
         assert result["OLQ-9998"]["野球"] == 1
         assert len(result["OLQ-9998"]) == 1
 
-    def test_count_doc_freq(self, fe, parsed_questions):
-        result = fe.count_doc_freq(parsed_questions)
-        assert result["社会保険事務所"] == 1
-        assert result["国民年金"] == 8
-
-    def test_count_collection_freq(self, fe, parsed_questions):
-        result = fe.count_collection_freq(parsed_questions)
-        assert result["社会保険事務所"] > 1
-        assert result["国民年金"] > 8
-
     def test_extract(self, fe, queries, questions):
         result = fe.extract(queries, questions)
         assert len(result[0]["features"]) == len(fe.feature_names)

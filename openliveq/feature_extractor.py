@@ -1,5 +1,6 @@
 from .nlp.parser import Parser
-from .features import (FeatureFactory, 
+from .feature_factory import FeatureFactory
+from .features import (
     tf_sum, log_tf_sum, norm_tf_sum, log_norm_tf_sum, idf_sum, log_idf_sum,
     icf_sum, log_tfidf_sum, tfidf_sum, tf_in_idf_sum, bm25, log_bm25,
     lm_dir, lm_jm, lm_abs, dlen, log_dlen)
@@ -9,7 +10,6 @@ from collections import defaultdict
 
 class FeatureExtractor(object):
     FIELDS = ["title", "snippet", "question_body", "best_answer_body"]
-    DOC_FROM = ["question_body", "best_answer_body"]
     METHODS = (
         tf_sum, log_tf_sum, norm_tf_sum, log_norm_tf_sum, idf_sum, log_idf_sum,
         icf_sum, log_tfidf_sum, tfidf_sum, tf_in_idf_sum, bm25, log_bm25,
@@ -25,12 +25,7 @@ class FeatureExtractor(object):
         parsed_queries = self.parse_queries(queries)
         parsed_questions = self.parse_questions(questions)
 
-        df = self.count_doc_freq(parsed_questions)
-        cf = self.count_collection_freq(parsed_questions)
-        dn = len(parsed_questions)
-        cn = sum(cf.values())
-
-        ff = FeatureFactory(df, cf, dn, cn)
+        ff = FeatureFactory(parsed_questions)
 
         result = []
         for q in questions:
@@ -51,28 +46,6 @@ class FeatureExtractor(object):
                 for m in self.METHODS]
         for qf in self.QUESTION_FEATURE_METHODS:
             result.append(qf(question))
-        return result
-
-    def count_doc_freq(self, question_wordsets):
-        '''
-        Document frequency based on DOC_FROM fields of questions
-        '''
-        result = defaultdict(int)
-        for label in self.DOC_FROM:
-            for question_id, wordsets in question_wordsets.items():
-                for w in set(wordsets[label].keys()):
-                    result[w] += 1
-        return result
-
-    def count_collection_freq(self, question_wordsets):
-        '''
-        Collection frequency based on DOC_FROM fields of questions
-        '''
-        result = defaultdict(int)
-        for label in self.DOC_FROM:
-            for question_id, wordsets in question_wordsets.items():
-                for w in set(wordsets[label].keys()):
-                    result[w] += wordsets[label][w]
         return result
 
     def parse_questions(self, questions):

@@ -1,19 +1,5 @@
 from math import log
 
-class FeatureFactory(object):
-
-    def __init__(self, df, cf, dn, cn):
-        '''
-        df: document frequency
-        cf: collection frequency
-        dn: total number of documents
-        cn: total number of words
-        '''
-        self.df = df
-        self.cf = cf
-        self.dn = dn
-        self.cn = cn
-
 def tf_sum(q, d, ff):
     """
     ID 1 for OHSUMED
