@@ -10,7 +10,9 @@ setup(
     author_email = "kato@dl.kuis.kyoto-u.ac.jp",
     license     = "MIT License",
     url = "https://github.com/mpkato/openliveq",
-    install_requires = [],
+    install_requires = [
+        "click",
+    ],
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
