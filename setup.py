@@ -12,4 +12,9 @@ setup(
     url = "https://github.com/mpkato/openliveq",
     install_requires = [],
     tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            'openliveq=openliveq.__main__:main'
+        ]
+    },
 )
