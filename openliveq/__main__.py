@@ -1,9 +1,9 @@
 from .query import Query
 from .question import Question
-from .feature_extractor import FeatureExtractor
+from .collection import Collection
+from .feature_factory import FeatureFactory
 from .instance import Instance
 from .db import BULK_RATE, SessionContextFactory
-from sqlalchemy import func
 import sys, os
 import click
 
@@ -28,18 +28,25 @@ def feature(output_file):
     print()
 
     print("Loading queries and questions ...")
-    queries = Query.load(query_file)
-    questions = Question.load(question_file)
-    query_file.close()
-    question_file.close()
+    ff = FeatureFactory()
+    collection = Collection()
+    scf = SessionContextFactory()
+    with scf.create() as session:
+        queries = session.query(Query).all()
+        queries = {q.query_id: q for q in queries}
+    with scf.create() as session:
+        for q in session.query(Question):
+            ws = ff.parse_question(q)
+            collection.add(ws)
     print()
 
-    print("Extracting features ...") 
-    fe = FeatureExtractor()
-    result = fe.extract(queries, questions)
-    print()
-
-    print("Dumping features ...")
+    print("Extracting features ...")
+    result = []
+    with scf.create() as session:
+        for question in session.query(Question):
+            query = queries[question.query_id]
+            instance = ff.extract(query, question, collection)
+            result.append(instance)
     Instance.dump(result, output_file)
     output_file.close()
 
@@ -79,7 +86,5 @@ def load(query_file, question_file):
 
     # report
     with scf.create() as session:
-        print("%d queries loaded" %
-            session.query(func.count('*')).select_from(Query).scalar())
-        print("%d questions loaded" %
-            session.query(func.count('*')).select_from(Question).scalar())
+        print("%d queries loaded" % session.query(Query).count())
+        print("%d questions loaded" % session.query(Question).count())

@@ -3,11 +3,18 @@ from click.testing import CliRunner
 import pytest
 import tempfile
 import os
-from sqlalchemy import func
 import openliveq as olq
-from openliveq.db import SessionContextFactory
+from openliveq.db import DBPATH, SessionContextFactory
 
 class TestMain(object):
+
+    def setup_method(self, method):
+        if os.path.exists(DBPATH):
+            os.remove(DBPATH)
+
+    def teardown_method(self, method):
+        if os.path.exists(DBPATH):
+            os.remove(DBPATH)
 
     def test_main(self):
         runner = CliRunner()
@@ -19,31 +26,33 @@ class TestMain(object):
         assert result.exit_code == 2
         assert result.output.startswith('Usage:')
 
-    def test_feature_extraction(self):
-        with pytest.raises(Exception):
-            runner = CliRunner()
-            result = runner.invoke(main, ["feature"])
-            assert result.exit_code == 2
-            assert result.output.startswith('Usage:')
-            assert "Missing" in result.output
+    def test_feature_extraction(self, query_filepath, question_filepath):
+        runner = CliRunner()
+        result = runner.invoke(main, ["feature"])
+        assert result.exit_code == 2
+        assert result.output.startswith('Usage:')
+        assert "Missing" in result.output
 
-            output = tempfile.NamedTemporaryFile()
-            filename = output.name
-            output.close()
-            result = runner.invoke(main, ["feature", 
-                query_filepath, question_filepath, filename])
-            assert result.exit_code == 0
-            with open(filename) as f:
-                lines = f.readlines()
-            assert "OLQ-9998" in lines[0]
-            assert "OLQ-9999" in lines[1]
-            assert "OLQ-9999" in lines[2]
-            assert "OLQ-9999" in lines[3]
-            assert "OLQ-9999" in lines[4]
-            for line in lines:
-                assert line.startswith("0")
-                assert len(line.split(" ")) == 82
-            assert len(lines) == 5
+        result = runner.invoke(main, ["load", 
+            query_filepath, question_filepath])
+        assert result.exit_code == 0
+
+        output = tempfile.NamedTemporaryFile()
+        filename = output.name
+        output.close()
+        result = runner.invoke(main, ["feature", filename])
+        assert result.exit_code == 0
+        with open(filename) as f:
+            lines = f.readlines()
+        assert "OLQ-9998" in lines[0]
+        assert "OLQ-9999" in lines[1]
+        assert "OLQ-9999" in lines[2]
+        assert "OLQ-9999" in lines[3]
+        assert "OLQ-9999" in lines[4]
+        for line in lines:
+            assert line.startswith("0")
+            assert len(line.split(" ")) == 82
+        assert len(lines) == 5
 
     def test_load(self, query_filepath, question_filepath):
         runner = CliRunner()
@@ -52,18 +61,15 @@ class TestMain(object):
         assert result.output.startswith('Usage:')
         assert "Missing" in result.output
 
-        output = tempfile.NamedTemporaryFile()
-        filename = output.name
-        output.close()
         result = runner.invoke(main, ["load", 
             query_filepath, question_filepath])
         assert result.exit_code == 0
 
         scf = SessionContextFactory()
         with scf.create() as session:
-            cnt = session.query(func.count('*')).select_from(olq.Query).scalar()
+            cnt = session.query(olq.Query).count()
             assert cnt == 2
-            cnt = session.query(func.count('*')).select_from(olq.Question).scalar()
+            cnt = session.query(olq.Question).count()
             assert cnt == 5
 
     @pytest.fixture

@@ -8,44 +8,44 @@ from math import log
 
 class TestTextualFeatures(object):
 
-    def test_tf_sum(self, q, d, ff):
-        res = tf_sum(q, d, ff)
+    def test_tf_sum(self, q, d, c):
+        res = tf_sum(q, d, c)
         assert res == 4
 
-    def test_norm_tf_sum(self, q, d, ff):
-        res = norm_tf_sum(q, d, ff)
+    def test_norm_tf_sum(self, q, d, c):
+        res = norm_tf_sum(q, d, c)
         assert res == 1
-        res = norm_tf_sum(q, {}, ff)
+        res = norm_tf_sum(q, {}, c)
         assert res == 0
 
-    def test_lm_dir(self, q, d, ff):
+    def test_lm_dir(self, q, d, c):
         actual = log((1.0 + 50 * 3.0 / 15) / (4.0 + 50))\
             - log(50.0 / (4.0 + 50) * 3.0 / 15)\
             + log((3.0 + 50 * 7.0 / 15) / (4.0 + 50))\
             - log(50.0 / (4.0 + 50) * 7.0 / 15)\
             + 3 * log(50.0 / (4.0 + 50))\
             + log(3.0 / 15) + log(5.0 / 15) + log(7.0 / 15)
-        result = lm_dir(q, d, ff)
+        result = lm_dir(q, d, c)
         assert actual == pytest.approx(result)
 
-    def test_lm_jm(self, q, d, ff):
+    def test_lm_jm(self, q, d, c):
         actual = log(0.5 * 1.0 / 4.0 + 0.5 * 3.0 / 15)\
             - log(0.5 * 3.0 / 15)\
             + log(0.5 * 3.0 / 4.0 + 0.5 * 7.0 / 15)\
             - log(0.5 * 7.0 / 15)\
             + 3 * log(0.5)\
             + log(3.0 / 15) + log(5.0 / 15) + log(7.0 / 15)
-        result = lm_jm(q, d, ff)
+        result = lm_jm(q, d, c)
         assert actual == pytest.approx(result)
 
-    def test_lm_abs(self, q, d, ff):
+    def test_lm_abs(self, q, d, c):
         actual = log(0.5 / 4.0 + 1.0 / 4.0 * 3.0 / 15)\
             - log(1.0 / 4.0 * 3.0 / 15)\
             + log(2.5 / 4.0 + 1.0 / 4.0 * 7.0 / 15)\
             - log(1.0 / 4.0 * 7.0 / 15)\
             + 3 * log(1.0 / 4.0)\
             + log(3.0 / 15) + log(5.0 / 15) + log(7.0 / 15)
-        result = lm_abs(q, d, ff)
+        result = lm_abs(q, d, c)
         assert actual == pytest.approx(result)
 
     @pytest.fixture
@@ -57,8 +57,10 @@ class TestTextualFeatures(object):
         return {"a": 1, "c": 3}
 
     @pytest.fixture
-    def ff(self, parsed_questions):
-        return openliveq.FeatureFactory(parsed_questions)
+    def c(self, parsed_questions):
+        c = openliveq.Collection()
+        c.add(parsed_questions["1"])
+        return c
 
     @pytest.fixture
     def parsed_questions(self):
