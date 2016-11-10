@@ -9,7 +9,9 @@ class TestQuery(object):
             "fixtures", "sample_queries.tsv")
         qs = []
         with open(filepath) as f:
-            qs = olq.Query.load(f)
+            for line in f:
+                q = olq.Query.readline(line)
+                qs.append(q)
 
         assert qs[0].query_id == 'OLQ-9998'
         assert qs[0].body == '野球'

@@ -4,8 +4,9 @@ from openliveq.features import (answer_num, log_answer_num,
 import pytest
 import os
 from math import log
+from .test_base import TestBase
 
-class TestQuestionFeatures(object):
+class TestQuestionFeatures(TestBase):
 
     def test_answer_num(self, q1, q2):
         assert answer_num(q1) == 1
@@ -39,17 +40,6 @@ class TestQuestionFeatures(object):
     @pytest.fixture
     def fe(self):
         return olq.FeatureExtractor()
-
-    @pytest.fixture
-    def question_filepath(self):
-        return os.path.join(os.path.dirname(__file__),
-            "fixtures", "sample_questions.tsv")
-
-    @pytest.fixture
-    def questions(self, fe, question_filepath):
-        with open(question_filepath) as f:
-            result = olq.Question.load(f)
-        return result
 
     @pytest.fixture
     def q1(self, questions):

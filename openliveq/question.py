@@ -1,11 +1,13 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Text, DateTime, Index
 from datetime import datetime
-
-Base = declarative_base()
+from .db import Base
 
 class Question(Base):
     __tablename__ = 'questions'
+    __table_args__ = (
+        Index('query_id_index', "query_id"),
+        Index('question_id_index', "question_id"),
+        )
 
     ORDERED_ATTRS = ["query_id", "rank", "question_id", "title", "snippet",
         "status", "updated_at", "answer_num", "view_num", "category",
@@ -38,12 +40,4 @@ class Question(Base):
         result.answer_num = int(result.answer_num)
         result.view_num = int(result.view_num)
 
-        return result
-
-    @classmethod
-    def load(cls, fp):
-        result = []
-        for line in fp:
-            elem = Question.readline(line)
-            result.append(elem)
         return result

@@ -10,7 +10,9 @@ class TestQuestion(object):
             "fixtures", "sample_questions.tsv")
         qs = []
         with open(filepath) as f:
-            qs = olq.Question.load(f)
+            for line in f:
+                q = olq.Question.readline(line)
+                qs.append(q)
 
         assert qs[0].query_id == 'OLQ-9998'
         assert qs[0].rank == 1

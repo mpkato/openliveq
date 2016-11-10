@@ -2,8 +2,10 @@
 import openliveq as olq
 import pytest
 import os
+from .test_base import TestBase
+from openliveq.db import SessionContextFactory
 
-class TestFeatureExtractor(object):
+class TestFeatureExtractor(TestBase):
 
     def test_parse_questions(self, fe, questions):
         result = fe.parse_questions(questions)
@@ -35,30 +37,8 @@ class TestFeatureExtractor(object):
         return olq.FeatureExtractor()
 
     @pytest.fixture
-    def question_filepath(self):
-        return os.path.join(os.path.dirname(__file__),
-            "fixtures", "sample_questions.tsv")
-
-    @pytest.fixture
-    def query_filepath(self):
-        return os.path.join(os.path.dirname(__file__),
-            "fixtures", "sample_queries.tsv")
-
-    @pytest.fixture
-    def questions(self, fe, question_filepath):
-        with open(question_filepath) as f:
-            result = olq.Question.load(f)
-        return result
-
-    @pytest.fixture
     def parsed_questions(self, fe, questions):
         result = fe.parse_questions(questions)
-        return result
-
-    @pytest.fixture
-    def queries(self, fe, query_filepath):
-        with open(query_filepath) as f:
-            result = olq.Query.load(f)
         return result
 
     @pytest.fixture
