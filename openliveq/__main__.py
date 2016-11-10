@@ -1,6 +1,7 @@
 from .query import Query
 from .question import Question
 from .feature_extractor import FeatureExtractor
+from .instance import Instance
 import click
 
 @click.group(invoke_without_command=True)
@@ -42,9 +43,5 @@ def feature(query_file, question_file, output_file):
     print()
 
     print("Dumping features ...")
-    for r in result:
-        output_file.write(
-            "\t".join([r["query_id"], r["question_id"], 
-                "\t".join(map(str, r["features"]))]) + "\n"
-        )
+    Instance.dump(result, output_file)
     output_file.close()

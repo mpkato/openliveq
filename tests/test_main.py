@@ -31,11 +31,14 @@ class TestMain(object):
         assert result.exit_code == 0
         with open(filename) as f:
             lines = f.readlines()
-        assert lines[0].startswith("OLQ-9998")
-        assert lines[1].startswith("OLQ-9999")
-        assert lines[2].startswith("OLQ-9999")
-        assert lines[3].startswith("OLQ-9999")
-        assert lines[4].startswith("OLQ-9999")
+        assert "OLQ-9998" in lines[0]
+        assert "OLQ-9999" in lines[1]
+        assert "OLQ-9999" in lines[2]
+        assert "OLQ-9999" in lines[3]
+        assert "OLQ-9999" in lines[4]
+        for line in lines:
+            assert line.startswith("0")
+            assert len(line.split(" ")) == 82
         assert len(lines) == 5
 
     @pytest.fixture

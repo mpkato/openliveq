@@ -22,7 +22,7 @@ class TestFeatureExtractor(object):
 
     def test_extract(self, fe, queries, questions):
         result = fe.extract(queries, questions)
-        assert len(result[0]["features"]) == len(fe.feature_names)
+        assert len(result[0].features) == len(fe.feature_names)
         assert len(result) == 5
 
     def test_feature_names(self, fe):

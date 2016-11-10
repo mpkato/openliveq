@@ -1,4 +1,5 @@
 from .nlp.parser import Parser
+from .instance import Instance
 from .feature_factory import FeatureFactory
 from .features import (
     # textual_features
@@ -35,8 +36,8 @@ class FeatureExtractor(object):
                 parsed_queries[q.query_id],
                 parsed_questions[q.question_id],
                 ff)
-            result.append({"query_id": q.query_id,
-                "question_id": q.question_id, "features": f})
+            instance = Instance(q.query_id, q.question_id, f)
+            result.append(instance)
 
         return result
 
