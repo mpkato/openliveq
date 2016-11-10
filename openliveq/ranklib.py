@@ -3,6 +3,7 @@ import sys
 import subprocess
 import tempfile
 from collections import defaultdict
+from .instance import Instance
 
 RANKLIB_FILEPATH = os.path.join(os.path.dirname(__file__), 'RankLib-2.1.jar')
 
@@ -20,14 +21,16 @@ class Ranklib(object):
     def learn(self, instances, **kwargs):
         learnfile = self._tempfile()
         instances = sorted(instances, key=lambda x: x.query_id)
-        self.dump(instances, learnfile)
-        return learn_file(learnfile)
+        with open(learnfile, "w") as f:
+            Instance.dump(instances, f)
+        return self.learn_file(learnfile)
 
     def score(self, model, instances, **kwargs):
         testfile = self._tempfile()
         instances = sorted(instances, key=lambda x: x.query_id)
-        self.dump(instances, testfile)
-        scores = score_file(learnfile)
+        with open(testfile, "w") as f:
+            Instance.dump(instances, f)
+        scores = self.score_file(model, testfile)
 
         result = defaultdict(list)
         for i, s in zip(instances, scores):
@@ -37,10 +40,6 @@ class Ranklib(object):
                 key=lambda x: x[1], reverse=True)
 
         return result
-
-    def dump(self, instances, fp):
-        for i in instances:
-            fp.write(i.dumps() + "\n")
 
     def learn_file(self, filepath, **kwargs):
         savefile = self._tempfile()
