@@ -12,6 +12,7 @@ setup(
     url = "https://github.com/mpkato/openliveq",
     install_requires = [
         "click",
+        "SQLAlchemy",
     ],
     tests_require=['pytest'],
     entry_points={

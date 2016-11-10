@@ -1,30 +1,43 @@
+from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
-class Question(object):
+Base = declarative_base()
 
-    def __init__(self, query_id, rank, question_id, title, snippet,
-        status, updated_at, answer_num, view_num, category,
-        question_body, best_answer_body):
-        self.query_id = query_id
-        self.rank = int(rank)
-        self.question_id = question_id
-        self.title = title
-        self.snippet = snippet
-        self.status = status
-        self.updated_at = datetime.strptime(updated_at,
-            "%Y/%m/%d %H:%M:%S")
-        self.answer_num = int(answer_num)
-        self.view_num = int(view_num)
-        self.category = category
-        self.question_body = question_body
-        self.best_answer_body = best_answer_body
+class Question(Base):
+    __tablename__ = 'questions'
+
+    ORDERED_ATTRS = ["query_id", "rank", "question_id", "title", "snippet",
+        "status", "updated_at", "answer_num", "view_num", "category",
+        "question_body", "best_answer_body"]
+
+    query_id = Column(String(8), primary_key=True)
+    rank = Column(Integer)
+    question_id = Column(String(12), primary_key=True)
+    title = Column(String(255))
+    snippet = Column(Text)
+    status = Column(String(10))
+    updated_at = Column(DateTime)
+    answer_num = Column(Integer)
+    view_num = Column(Integer)
+    category = Column(String(255))
+    question_body = Column(Text)
+    best_answer_body = Column(Text)
 
     @classmethod
     def readline(cls, line):
         ls = [l.strip() for l in line.split("\t")]
         if len(ls) != 12:
             return None
-        result = Question(*ls)
+        args = {attr: ls[i] for i, attr in enumerate(cls.ORDERED_ATTRS)}
+        result = Question(**args)
+        # convertion
+        result.rank = int(result.rank)
+        result.updated_at = datetime.strptime(result.updated_at,
+            "%Y/%m/%d %H:%M:%S")
+        result.answer_num = int(result.answer_num)
+        result.view_num = int(result.view_num)
+
         return result
 
     @classmethod
