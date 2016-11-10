@@ -3,6 +3,9 @@ from click.testing import CliRunner
 import pytest
 import tempfile
 import os
+from sqlalchemy import func
+import openliveq as olq
+from openliveq.db import SessionContextFactory
 
 class TestMain(object):
 
@@ -16,7 +19,7 @@ class TestMain(object):
         assert result.exit_code == 2
         assert result.output.startswith('Usage:')
 
-    def test_feature_extraction(self, query_filepath, question_filepath):
+    def test_feature_extraction(self):
         with pytest.raises(Exception):
             runner = CliRunner()
             result = runner.invoke(main, ["feature"])
@@ -41,6 +44,27 @@ class TestMain(object):
                 assert line.startswith("0")
                 assert len(line.split(" ")) == 82
             assert len(lines) == 5
+
+    def test_load(self, query_filepath, question_filepath):
+        runner = CliRunner()
+        result = runner.invoke(main, ["load"])
+        assert result.exit_code == 2
+        assert result.output.startswith('Usage:')
+        assert "Missing" in result.output
+
+        output = tempfile.NamedTemporaryFile()
+        filename = output.name
+        output.close()
+        result = runner.invoke(main, ["load", 
+            query_filepath, question_filepath])
+        assert result.exit_code == 0
+
+        scf = SessionContextFactory()
+        with scf.create() as session:
+            cnt = session.query(func.count('*')).select_from(olq.Query).scalar()
+            assert cnt == 2
+            cnt = session.query(func.count('*')).select_from(olq.Question).scalar()
+            assert cnt == 5
 
     @pytest.fixture
     def question_filepath(self):
