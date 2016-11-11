@@ -33,14 +33,13 @@ class TestMain(object):
         assert result.output.startswith('Usage:')
         assert "Missing" in result.output
 
-        result = runner.invoke(main, ["load", 
-            query_filepath, question_filepath])
+        result = runner.invoke(main, ["load", question_filepath])
         assert result.exit_code == 0
 
         output = tempfile.NamedTemporaryFile()
         filename = output.name
         output.close()
-        result = runner.invoke(main, ["feature", filename])
+        result = runner.invoke(main, ["feature", query_filepath, filename])
         assert result.exit_code == 0
         with open(filename) as f:
             lines = f.readlines()
@@ -54,21 +53,18 @@ class TestMain(object):
             assert len(line.split(" ")) == 82
         assert len(lines) == 5
 
-    def test_load(self, query_filepath, question_filepath):
+    def test_load(self, question_filepath):
         runner = CliRunner()
         result = runner.invoke(main, ["load"])
         assert result.exit_code == 2
         assert result.output.startswith('Usage:')
         assert "Missing" in result.output
 
-        result = runner.invoke(main, ["load", 
-            query_filepath, question_filepath])
+        result = runner.invoke(main, ["load", question_filepath])
         assert result.exit_code == 0
 
         scf = SessionContextFactory()
         with scf.create() as session:
-            cnt = session.query(olq.Query).count()
-            assert cnt == 2
             cnt = session.query(olq.Question).count()
             assert cnt == 5
 

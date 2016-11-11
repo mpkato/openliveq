@@ -14,8 +14,6 @@ class TestBase(object):
         runner = CliRunner()
         result = runner.invoke(main, ['load',
             os.path.join(os.path.dirname(__file__), "fixtures",
-            "sample_queries.tsv"),
-            os.path.join(os.path.dirname(__file__), "fixtures",
             "sample_questions.tsv"),
             ])
         assert result.exit_code == 0
@@ -27,9 +25,10 @@ class TestBase(object):
 
     @pytest.fixture
     def queries(self):
-        scf = SessionContextFactory()
-        with scf.create() as session:
-            result = session.query(olq.Query).all()
+        filepath = os.path.join(os.path.dirname(__file__), "fixtures",
+            "sample_queries.tsv")
+        with open(filepath) as f:
+            result = olq.Query.load(f)
         return result
 
     @pytest.fixture
