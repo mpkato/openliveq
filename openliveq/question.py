@@ -5,8 +5,8 @@ from .db import Base
 class Question(Base):
     __tablename__ = 'questions'
     __table_args__ = (
-        Index('query_id_index', "query_id"),
-        Index('question_id_index', "question_id"),
+        Index('questions_query_id_index', "query_id"),
+        Index('questions_question_id_index', "question_id"),
         )
 
     ORDERED_ATTRS = ["query_id", "rank", "question_id", "title", "snippet",

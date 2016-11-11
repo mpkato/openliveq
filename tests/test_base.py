@@ -15,6 +15,8 @@ class TestBase(object):
         result = runner.invoke(main, ['load',
             os.path.join(os.path.dirname(__file__), "fixtures",
             "sample_questions.tsv"),
+            os.path.join(os.path.dirname(__file__), "fixtures",
+            "sample_clickthrough.tsv"),
             ])
         assert result.exit_code == 0
 

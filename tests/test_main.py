@@ -26,14 +26,16 @@ class TestMain(object):
         assert result.exit_code == 2
         assert result.output.startswith('Usage:')
 
-    def test_feature_extraction(self, query_filepath, question_filepath):
+    def test_feature_extraction(self, 
+        query_filepath, question_filepath, clickthrough_filepath):
         runner = CliRunner()
         result = runner.invoke(main, ["feature"])
         assert result.exit_code == 2
         assert result.output.startswith('Usage:')
         assert "Missing" in result.output
 
-        result = runner.invoke(main, ["load", question_filepath])
+        result = runner.invoke(main, ["load", 
+            question_filepath, clickthrough_filepath])
         assert result.exit_code == 0
 
         output = tempfile.NamedTemporaryFile()
@@ -53,20 +55,28 @@ class TestMain(object):
             assert len(line.split(" ")) == 82
         assert len(lines) == 5
 
-    def test_load(self, question_filepath):
+    def test_load(self, question_filepath, clickthrough_filepath):
         runner = CliRunner()
         result = runner.invoke(main, ["load"])
         assert result.exit_code == 2
         assert result.output.startswith('Usage:')
         assert "Missing" in result.output
 
-        result = runner.invoke(main, ["load", question_filepath])
+        result = runner.invoke(main, ["load", 
+            question_filepath, clickthrough_filepath])
         assert result.exit_code == 0
 
         scf = SessionContextFactory()
         with scf.create() as session:
             cnt = session.query(olq.Question).count()
             assert cnt == 5
+            cnt = session.query(olq.Clickthrough).count()
+            assert cnt == 5
+
+    @pytest.fixture
+    def query_filepath(self):
+        return os.path.join(os.path.dirname(__file__),
+            "fixtures", "sample_queries.tsv")
 
     @pytest.fixture
     def question_filepath(self):
@@ -74,6 +84,6 @@ class TestMain(object):
             "fixtures", "sample_questions.tsv")
 
     @pytest.fixture
-    def query_filepath(self):
+    def clickthrough_filepath(self):
         return os.path.join(os.path.dirname(__file__),
-            "fixtures", "sample_queries.tsv")
+            "fixtures", "sample_clickthrough.tsv")

@@ -1,5 +1,6 @@
 from .query import Query
 from .question import Question
+from .clickthrough import Clickthrough
 from .collection import Collection
 from .feature_factory import FeatureFactory
 from .instance import Instance
@@ -62,13 +63,16 @@ def feature(query_file, output_file):
 
     \b
     Arguments:
-        QUESTION_FILE: path to the question file
+        QUESTION_FILE:     path to the question file
+        CLICKTHROUGH_FILE: path to the clickthrough file
 ''')
 @click.argument('question_file', required=True, type=click.File('r'))
-def load(question_file):
+@click.argument('clickthrough_file', required=True, type=click.File('r'))
+def load(question_file, clickthrough_file):
     print("""
-    question_file:  %s
-    """ % (question_file.name,))
+    question_file:     %s
+    clickthrough_file: %s
+    """ % (question_file.name, clickthrough_file.name, ))
 
     scf = SessionContextFactory()
 
@@ -81,6 +85,16 @@ def load(question_file):
                 session.flush()
         session.commit()
 
+    # clickthroughs (bulk insert)
+    with scf.create() as session:
+        for idx, line in enumerate(clickthrough_file):
+            elem = Clickthrough.readline(line)
+            session.add(elem)
+            if idx % BULK_RATE == 0:
+                session.flush()
+        session.commit()
+
     # report
     with scf.create() as session:
         print("%d questions loaded" % session.query(Question).count())
+        print("%d clickthroughs loaded" % session.query(Clickthrough).count())
