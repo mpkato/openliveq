@@ -1,63 +1,28 @@
-import random
-from collections import defaultdict
+from math import exp
 
 class ClickModel(object):
     '''
-    I WAS STUPID!!!! THIS IS WRONG!!!!
-    Position-biased Model:
-    P(C=1) = P(A=1|E=1)P(E=1)
-    P(C=0) = P(A=0|E=1)P(E=1) + P(E=0)
+    Simple Position-biased Model:
+    P(C_r=1) = P(A_r=1|E_r=1)P(E_r=1),
+    where
+        C_r is click on the r-th document,
+        A_r is being attracted by the r-th document, and
+        E_r is examination of the r-th document.
 
-    EM algorithm (simplified):
-        a_qd = CTR_qd + (1 - CTR_qd) * (1 - g_r) * a_qd / (1 - g_r * a_qd)
+    In this simple model, the examination probability is defined as
+    P(E_r=1) = exp(- r / sigma).
+    Therefore, P(A_r=1|E_r=1) = P(C_r=1) / P(E_r=1).
 
-        g_r = 1 / Q * SUM (
-        CTR_qd + (1 - CTR_qd) * (1 - a_qd) * g_r / (1 - g_r * a_qd))
-
-        where a_qd = P(A=1|E=1) and g_r = P(E=1)
     '''
     @classmethod
-    def estimate(cls, ctrs, topk=10, iteration=100, epsilon=1e-5):
-        rank_probs = [random.random() for i in range(topk)]
-        rel_probs = defaultdict(dict)
-        rctrs = defaultdict(list)
-        qctrs = defaultdict(list)
+    def estimate(cls, ctrs, sigma=10.0, topk=10):
+        result = {}
         for ctr in ctrs:
-            if ctr.rank <= topk:
-                rel_probs[ctr.query_id][ctr.question_id] = random.random()
-                rctrs[ctr.rank].append(ctr)
-                qctrs[ctr.query_id].append(ctr)
-
-        for i in range(iteration):
-            prev = list(rank_probs)
-            cls._update_rank_probs(rctrs, rank_probs, rel_probs)
-            cls._update_rel_probs(qctrs, rank_probs, rel_probs)
-            if cls._l2_loss(prev, rank_probs) < epsilon:
-                break
-
-        return rel_probs
+            eprob = cls._eprob(ctr.rank, sigma)
+            aprob = min([1.0, ctr.ctr / eprob])
+            result[(ctr.query_id, ctr.question_id)] = aprob
+        return result
 
     @classmethod
-    def _update_rank_probs(cls, rctrs, rank_probs, rel_probs):
-        for r in rctrs:
-            res = 0.0
-            for ctr in rctrs[r]:
-                alpha = rel_probs[ctr.query_id][ctr.question_id]
-                res += ctr.ctr + (1.0 - ctr.ctr)\
-                    * (1.0 - alpha) * rank_probs[r]\
-                    / (1.0 - alpha * rank_probs[r])
-            res /= len(rctrs[r])
-            rank_probs[r] = res
-
-    @classmethod
-    def _update_rel_probs(cls, qctrs, rank_probs, rel_probs):
-        for query_id in qctrs:
-            for ctr in qctrs[query_id]:
-                alpha = rel_probs[query_id][ctr.question_id]
-                rel_probs[query_id][ctr.question_id] = ctr.ctr\
-                    + (1.0 - ctr.ctr) * (1.0 - rank_probs[ctr.rank]) * alpha\
-                    / (1.0 - alpha * rank_probs[ctr.rank])
-
-    @classmethod
-    def _l2_loss(cls, x, y):
-        return sum([(xv - yv) ** 2 for xv, yv in zip(x, y)])
+    def _eprob(cls, rank, sigma):
+        return exp(- float(rank) / sigma)
