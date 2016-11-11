@@ -1,10 +1,12 @@
 from .query import Query
 from .question import Question
+from .query_question import QueryQuestion
 from .clickthrough import Clickthrough
 from .collection import Collection
 from .feature_factory import FeatureFactory
 from .instance import Instance
 from .db import BULK_RATE, SessionContextFactory
+from itertools import groupby
 import sys, os
 import click
 
@@ -19,40 +21,49 @@ def main(ctx):
 
     \b
     Arguments:
-        QUERY_FILE:    path to the query file
-        OUTPUT_FILE:   path to the output file
+        QUERY_FILE:             path to the query file
+        QUERY_QUESTION_FILE:    path to the file of query and question IDs
+        OUTPUT_FILE:            path to the output file
 ''')
 @click.argument('query_file', required=True, type=click.File('r'))
+@click.argument('query_question_file', required=True, type=click.File('r'))
 @click.argument('output_file', required=True, type=click.File('w'))
-def feature(query_file, output_file):
+def feature(query_file, query_question_file, output_file):
     print("""
-    query_file:     %s
-    output_file:    %s
-    """ % (query_file.name, output_file.name))
+    query_file:          %s
+    query_question_file: %s
+    output_file:         %s
+    """ % (query_file.name, query_question_file.name, output_file.name))
     print()
 
     print("Loading queries and questions ...")
     queries = Query.load(query_file)
+    queries = {q.query_id: q for q in queries}
     query_file.close()
+    qqs = QueryQuestion.load(query_question_file)
+    query_question_file.close()
 
     ff = FeatureFactory()
     collection = Collection()
     scf = SessionContextFactory()
     with scf.create() as session:
-        for query in queries:
-            for question in session.query(Question).\
-                filter(Question.query_id == query.query_id):
-                ws = ff.parse_question(question)
-                collection.add(ws)
+        for question in session.query(Question):
+            ws = ff.parse_question(question)
+            collection.add(ws)
     print()
 
     print("Extracting features ...")
     with scf.create() as session:
-        for idx, query in enumerate(queries):
+        for idx, (query_id, qs) in enumerate(
+            groupby(qqs, key=lambda x: x.query_id)):
             tmpqid = idx + 1
             instances = []
-            for question in session.query(Question).\
-                filter(Question.query_id == query.query_id):
+            for q in qs:
+                query = queries[query_id]
+                question = session.query(Question).\
+                    filter(
+                        Question.query_id == query_id and
+                        Question.question_id == q.question_id).first()
                 instance = ff.extract(query, question, collection)
                 instances.append(instance)
             Instance.dump(tmpqid, instances, output_file)

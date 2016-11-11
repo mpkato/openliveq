@@ -26,8 +26,8 @@ class TestMain(object):
         assert result.exit_code == 2
         assert result.output.startswith('Usage:')
 
-    def test_feature_extraction(self, 
-        query_filepath, question_filepath, clickthrough_filepath):
+    def test_feature_extraction(self, query_filepath, question_filepath, 
+        query_question_filepath, clickthrough_filepath):
         runner = CliRunner()
         result = runner.invoke(main, ["feature"])
         assert result.exit_code == 2
@@ -41,7 +41,8 @@ class TestMain(object):
         output = tempfile.NamedTemporaryFile()
         filename = output.name
         output.close()
-        result = runner.invoke(main, ["feature", query_filepath, filename])
+        result = runner.invoke(main, ["feature",
+            query_filepath, query_question_filepath, filename])
         assert result.exit_code == 0
         with open(filename) as f:
             lines = f.readlines()
@@ -49,11 +50,10 @@ class TestMain(object):
         assert "OLQ-9999" in lines[1]
         assert "OLQ-9999" in lines[2]
         assert "OLQ-9999" in lines[3]
-        assert "OLQ-9999" in lines[4]
         for line in lines:
             assert line.startswith("0")
             assert len(line.split(" ")) == 82
-        assert len(lines) == 5
+        assert len(lines) == 4
 
     def test_load(self, question_filepath, clickthrough_filepath):
         runner = CliRunner()
@@ -82,6 +82,11 @@ class TestMain(object):
     def question_filepath(self):
         return os.path.join(os.path.dirname(__file__),
             "fixtures", "sample_questions.tsv")
+
+    @pytest.fixture
+    def query_question_filepath(self):
+        return os.path.join(os.path.dirname(__file__),
+            "fixtures", "sample_query_question.tsv")
 
     @pytest.fixture
     def clickthrough_filepath(self):
