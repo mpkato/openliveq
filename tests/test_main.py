@@ -59,6 +59,18 @@ class TestMain(object):
             assert len(line.split(" ")) == 82
         assert len(lines) == 4
 
+    def test_feature_extraction_no_data(self, query_filepath, question_filepath, 
+        query_question_filepath, clickthrough_filepath):
+        runner = CliRunner()
+        output = tempfile.NamedTemporaryFile()
+        filename = output.name
+        output.close()
+        result = runner.invoke(main, ["feature",
+            query_filepath, query_question_filepath, filename])
+        assert result.exit_code != 0
+        assert "No such " in str(result.exception)
+        assert isinstance(result.exception, RuntimeError)
+
     def test_load(self, question_filepath, clickthrough_filepath):
         runner = CliRunner()
         result = runner.invoke(main, ["load"])
@@ -76,6 +88,18 @@ class TestMain(object):
             assert cnt == 5
             cnt = session.query(olq.Clickthrough).count()
             assert cnt == 5
+
+    def test_load_with_wrong_data(self, question_filepath, clickthrough_filepath):
+        runner = CliRunner()
+        result = runner.invoke(main, ["load", 
+            question_filepath, question_filepath])
+        assert result.exit_code != 0
+        assert isinstance(result.exception, RuntimeError)
+
+        result = runner.invoke(main, ["load", 
+            clickthrough_filepath, clickthrough_filepath])
+        assert result.exit_code != 0
+        assert isinstance(result.exception, RuntimeError)
 
     @pytest.fixture
     def query_filepath(self):

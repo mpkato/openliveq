@@ -8,7 +8,8 @@ class QueryQuestion(object):
     def readline(cls, line):
         ls = [l.strip() for l in line.split("\t")]
         if len(ls) != 2:
-            return None
+            raise RuntimeError("Invalid format for %s: %s"
+                % (cls.__name__, line))
         result = QueryQuestion(*ls)
         return result
 
