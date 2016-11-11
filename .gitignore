@@ -90,3 +90,6 @@ ENV/
 
 /settings.py
 *.jar
+
+# DB files
+*.sqlite3

@@ -50,6 +50,10 @@ class TestMain(object):
         assert "OLQ-9999" in lines[1]
         assert "OLQ-9999" in lines[2]
         assert "OLQ-9999" in lines[3]
+        assert "1167627151" in lines[0]
+        assert "1328077703" in lines[1]
+        assert "1414846259" in lines[2]
+        assert "1348120213" in lines[3]
         for line in lines:
             assert line.startswith("0")
             assert len(line.split(" ")) == 82
