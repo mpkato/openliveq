@@ -126,6 +126,39 @@ class TestMain(object):
         assert probs[("OLQ-9999", "1137083831")] == 0.2 / exp(-0.3)
         assert probs[("OLQ-9999", "1348120213")] == 0.1 / exp(-0.4)
 
+    def test_judge(self, query_filepath, query_question_filepath,
+        question_filepath, clickthrough_filepath):
+        output = tempfile.NamedTemporaryFile()
+        f_filename = output.name
+        output.close()
+        output = tempfile.NamedTemporaryFile()
+        r_filename = output.name
+        output.close()
+        output = tempfile.NamedTemporaryFile()
+        j_filename = output.name
+        output.close()
+        runner = CliRunner()
+        result = runner.invoke(main, ["load", 
+            question_filepath, clickthrough_filepath])
+        assert result.exit_code == 0
+        result = runner.invoke(main, ["feature",
+            query_filepath, query_question_filepath, f_filename])
+        assert result.exit_code == 0
+        result = runner.invoke(main, ["relevance", r_filename])
+        assert result.exit_code == 0
+
+        result = runner.invoke(main, ["judge", 
+            f_filename, r_filename, j_filename, "--scale", "4.0"])
+        assert result.exit_code == 0
+
+        with open(j_filename) as f:
+            lines = f.readlines()
+        assert len(lines) == 4
+        assert lines[0].startswith("2")
+        assert lines[1].startswith("2")
+        assert lines[2].startswith("1")
+        assert lines[3].startswith("1")
+
     @pytest.fixture
     def query_filepath(self):
         return os.path.join(os.path.dirname(__file__),
