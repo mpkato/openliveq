@@ -20,16 +20,12 @@ class Ranklib(object):
 
     def learn(self, instances, **kwargs):
         learnfile = self._tempfile()
-        instances = sorted(instances, key=lambda x: x.query_id)
-        with open(learnfile, "w") as f:
-            Instance.dump(instances, f)
+        instances = self._dump(instances, learnfile)
         return self.learn_file(learnfile)
 
     def score(self, model, instances, **kwargs):
         testfile = self._tempfile()
-        instances = sorted(instances, key=lambda x: x.query_id)
-        with open(testfile, "w") as f:
-            Instance.dump(instances, f)
+        instances = self._dump(instances, testfile)
         scores = self.score_file(model, testfile)
 
         result = defaultdict(list)
@@ -84,3 +80,18 @@ class Ranklib(object):
             print(e.stdout.decode(), file=sys.stderr)
             raise e
         return ret
+
+    def _dump(self, instances, filepath):
+        '''
+        Return a list of instances in order of insertion
+        '''
+        result = []
+        groups = defaultdict(list)
+        for i in instances:
+            groups[i.query_id].append(i)
+        with open(filepath, "w") as f:
+            for idx, qid in enumerate(groups):
+                tmpqid = idx + 1
+                Instance.dump(tmpqid, groups[qid], f)
+                result += groups[qid]
+        return result

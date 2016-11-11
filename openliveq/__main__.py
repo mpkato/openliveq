@@ -32,30 +32,29 @@ def feature(query_file, output_file):
 
     print("Loading queries and questions ...")
     queries = Query.load(query_file)
-    queries = {q.query_id: q for q in queries}
     query_file.close()
 
     ff = FeatureFactory()
     collection = Collection()
     scf = SessionContextFactory()
     with scf.create() as session:
-        for query_id in queries:
+        for query in queries:
             for question in session.query(Question).\
-                filter(Question.query_id == query_id):
+                filter(Question.query_id == query.query_id):
                 ws = ff.parse_question(question)
                 collection.add(ws)
     print()
 
     print("Extracting features ...")
-    result = []
     with scf.create() as session:
-        for query_id in queries:
-            query = queries[query_id]
+        for idx, query in enumerate(queries):
+            tmpqid = idx + 1
+            instances = []
             for question in session.query(Question).\
-                filter(Question.query_id == query_id):
+                filter(Question.query_id == query.query_id):
                 instance = ff.extract(query, question, collection)
-                result.append(instance)
-    Instance.dump(result, output_file)
+                instances.append(instance)
+            Instance.dump(tmpqid, instances, output_file)
     output_file.close()
 
 @main.command(help='''
