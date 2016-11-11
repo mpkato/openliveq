@@ -1,5 +1,6 @@
 from openliveq.__main__ import main
 from click.testing import CliRunner
+from math import exp
 import pytest
 import tempfile
 import os
@@ -100,6 +101,30 @@ class TestMain(object):
             clickthrough_filepath, clickthrough_filepath])
         assert result.exit_code != 0
         assert isinstance(result.exception, RuntimeError)
+
+    def test_relevance(self, question_filepath, clickthrough_filepath):
+        output = tempfile.NamedTemporaryFile()
+        filename = output.name
+        output.close()
+        runner = CliRunner()
+        result = runner.invoke(main, ["load", 
+            question_filepath, clickthrough_filepath])
+        assert result.exit_code == 0
+        result = runner.invoke(main, ["relevance", filename])
+        assert result.exit_code == 0
+
+        probs = {}
+        with open(filename) as f:
+            for line in f:
+                ls = [l.strip() for l in line.split("\t")]
+                probs[tuple(ls[:2])] = float(ls[-1])
+
+        assert len(probs) == 5
+        assert probs[("OLQ-9998", "1167627151")] == 0.5 / exp(-0.1)
+        assert probs[("OLQ-9999", "1328077703")] == 0.5 / exp(-0.1)
+        assert probs[("OLQ-9999", "1414846259")] == 0.2 / exp(-0.2)
+        assert probs[("OLQ-9999", "1137083831")] == 0.2 / exp(-0.3)
+        assert probs[("OLQ-9999", "1348120213")] == 0.1 / exp(-0.4)
 
     @pytest.fixture
     def query_filepath(self):

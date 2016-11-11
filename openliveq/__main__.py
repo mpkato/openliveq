@@ -5,6 +5,7 @@ from .clickthrough import Clickthrough
 from .collection import Collection
 from .feature_factory import FeatureFactory
 from .instance import Instance
+from .click_model import ClickModel
 from .db import BULK_RATE, SessionContextFactory
 from itertools import groupby
 import sys, os
@@ -114,3 +115,30 @@ def feature(query_file, query_question_file, output_file, verbose):
             Instance.dump(tmpqid, instances, output_file)
     output_file.close()
 
+@main.command(help='''
+    Output relevance scores based on a very simple click model
+
+    \b
+    Arguments:
+        OUTPUT_FILE:            path to the output file
+''')
+@click.argument('output_file', required=True, type=click.File('w'))
+@click.option('--sigma', type=float, default=10.0,
+    help="used for estimating the examination probability based on the rank.")
+@click.option('--topk', type=int, default=10,
+    help="only topk results are used (the default value 10 is highly recommended).")
+@click.option('--verbose', '-v', is_flag=True, help="increase verbosity.")
+def relevance(output_file, sigma, topk, verbose):
+    print("""
+    output_file:         %s
+    sigma:               %s
+    topk:                %s
+    """ % (output_file.name, sigma, topk))
+
+    scf = SessionContextFactory(echo=verbose)
+    with scf.create() as session:
+        ctrs = session.query(Clickthrough).all()
+    result = ClickModel.estimate(ctrs, sigma=sigma, topk=topk)
+    for ids in result:
+        output_file.write("\t".join(list(ids) + [str(result[ids])]) + "\n")
+    output_file.close()
