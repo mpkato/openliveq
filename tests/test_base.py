@@ -40,3 +40,10 @@ class TestBase(object):
             result = session.query(olq.Question).all()
         return result
 
+    @pytest.fixture
+    def clickthroughs(self):
+        scf = SessionContextFactory()
+        with scf.create() as session:
+            result = session.query(olq.Clickthrough).all()
+        return result
+
