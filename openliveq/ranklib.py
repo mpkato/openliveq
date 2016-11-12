@@ -92,6 +92,7 @@ class Ranklib(object):
         with open(filepath, "w") as f:
             for idx, qid in enumerate(groups):
                 tmpqid = idx + 1
-                Instance.dump(tmpqid, groups[qid], f)
+                for i in groups[qid]:
+                    Instance.dump(tmpqid, i, f)
                 result += groups[qid]
         return result

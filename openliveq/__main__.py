@@ -84,14 +84,6 @@ def feature(query_file, query_question_file, output_file, verbose):
     queries = {q.query_id: q for q in queries}
     query_file.close()
     qqs = QueryQuestion.load(query_question_file)
-    qqs_per_q = defaultdict(list)
-    query_id_index = {}
-    for qq in qqs:
-        if not qq.query_id in query_id_index:
-            query_id_index[qq.query_id] = len(query_id_index)
-        qqs_per_q[qq.query_id].append(qq)
-    qqs_per_q = sorted(qqs_per_q.items(), 
-        key=lambda x: query_id_index[x[0]])
     query_question_file.close()
 
     ff = FeatureFactory()
@@ -104,22 +96,22 @@ def feature(query_file, query_question_file, output_file, verbose):
     print()
 
     print("Extracting features ...")
+    tmpqids = {}
     with scf.create() as session:
-        for idx, (query_id, qs) in enumerate(qqs_per_q):
-            tmpqid = idx + 1
-            instances = []
-            for q in qs:
-                query = queries[query_id]
-                question = session.query(Question).\
-                    filter(
-                        Question.query_id == query_id,
-                        Question.question_id == q.question_id).first()
-                if question is None:
-                    raise RuntimeError("No such question in DB: %s, %s"
-                        % (query_id, q.question_id))
-                instance = ff.extract(query, question, collection)
-                instances.append(instance)
-            Instance.dump(tmpqid, instances, output_file)
+        for qq in qqs:
+            if not qq.query_id in tmpqids:
+                tmpqids[qq.query_id] = len(tmpqids) + 1
+            tmpqid = tmpqids[qq.query_id]
+            query = queries[qq.query_id]
+            question = session.query(Question).\
+                filter(
+                    Question.query_id == qq.query_id,
+                    Question.question_id == qq.question_id).first()
+            if question is None:
+                raise RuntimeError("No such question in DB: %s, %s"
+                    % (qq.query_id, qq.question_id))
+            instance = ff.extract(query, question, collection)
+            Instance.dump(tmpqid, instance, output_file)
     output_file.close()
 
 @main.command(help='''

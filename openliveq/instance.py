@@ -7,15 +7,12 @@ class Instance(object):
         self.grade = grade
 
     @classmethod
-    def dump(cls, tmpqid, instances, fp):
+    def dump(cls, tmpqid, instance, fp):
         '''
         tmpqid: positive integer representing a query ID
-        instances: ones that belongs to the same query
         '''
-        assert len(set([i.query_id for i in instances])) == 1
-        for i in instances:
-            line = [str(i.grade), "qid:%s" % tmpqid]
-            line += ["%s:%s" % (idx+1, f)
-                for idx, f in enumerate(i.features)]
-            line += ["#", i.query_id, i.question_id]
-            fp.write(" ".join(line) + "\n")
+        line = [str(instance.grade), "qid:%s" % tmpqid]
+        line += ["%s:%s" % (idx+1, f)
+            for idx, f in enumerate(instance.features)]
+        line += ["#", instance.query_id, instance.question_id]
+        fp.write(" ".join(line) + "\n")

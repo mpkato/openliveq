@@ -129,21 +129,39 @@ class TestMain(object):
 
     def test_judge(self, feature_filepath, relevance_filepath):
         output = tempfile.NamedTemporaryFile()
-        j_filename = output.name
+        filename = output.name
         output.close()
         runner = CliRunner()
 
         result = runner.invoke(main, ["judge",
-            feature_filepath, relevance_filepath, j_filename])
+            feature_filepath, relevance_filepath, filename])
         assert result.exit_code == 0
 
-        with open(j_filename) as f:
+        with open(filename) as f:
             lines = f.readlines()
         assert len(lines) == 4
         assert lines[0].startswith("4")
         assert lines[1].startswith("4")
         assert lines[2].startswith("3")
         assert lines[3].startswith("1")
+
+    def test_rank(self, feature_filepath, score_filepath):
+        output = tempfile.NamedTemporaryFile()
+        filename = output.name
+        output.close()
+        runner = CliRunner()
+
+        result = runner.invoke(main, ["rank",
+            feature_filepath, score_filepath, filename])
+        assert result.exit_code == 0
+
+        with open(filename) as f:
+            lines = f.readlines()
+        assert len(lines) == 4
+        assert lines[0].startswith("OLQ-9998\t1167627151")
+        assert lines[1].startswith("OLQ-9999\t1328077703")
+        assert lines[2].startswith("OLQ-9999\t1414846259")
+        assert lines[3].startswith("OLQ-9999\t1348120213")
 
     @pytest.fixture
     def query_filepath(self):
@@ -174,3 +192,8 @@ class TestMain(object):
     def relevance_filepath(self):
         return os.path.join(os.path.dirname(__file__),
             "fixtures", "sample_relevances.tsv")
+
+    @pytest.fixture
+    def score_filepath(self):
+        return os.path.join(os.path.dirname(__file__),
+            "fixtures", "sample_scores.tsv")
