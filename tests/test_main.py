@@ -27,7 +27,37 @@ class TestMain(object):
         assert result.exit_code == 2
         assert result.output.startswith('Usage:')
 
-    def test_feature_extraction(self, query_filepath, question_filepath, 
+    def test_load(self, question_filepath, clickthrough_filepath):
+        runner = CliRunner()
+        result = runner.invoke(main, ["load"])
+        assert result.exit_code == 2
+        assert result.output.startswith('Usage:')
+        assert "Missing" in result.output
+
+        result = runner.invoke(main, ["load", 
+            question_filepath, clickthrough_filepath])
+        assert result.exit_code == 0
+
+        scf = SessionContextFactory()
+        with scf.create() as session:
+            cnt = session.query(olq.Question).count()
+            assert cnt == 5
+            cnt = session.query(olq.Clickthrough).count()
+            assert cnt == 5
+
+    def test_load_with_wrong_data(self, question_filepath, clickthrough_filepath):
+        runner = CliRunner()
+        result = runner.invoke(main, ["load", 
+            question_filepath, question_filepath])
+        assert result.exit_code != 0
+        assert isinstance(result.exception, RuntimeError)
+
+        result = runner.invoke(main, ["load", 
+            clickthrough_filepath, clickthrough_filepath])
+        assert result.exit_code != 0
+        assert isinstance(result.exception, RuntimeError)
+
+    def test_feature(self, query_filepath, question_filepath, 
         query_question_filepath, clickthrough_filepath):
         runner = CliRunner()
         result = runner.invoke(main, ["feature"])
@@ -60,7 +90,7 @@ class TestMain(object):
             assert len(line.split(" ")) == 82
         assert len(lines) == 4
 
-    def test_feature_extraction_no_data(self, query_filepath, question_filepath, 
+    def test_feature_no_data(self, query_filepath, question_filepath, 
         query_question_filepath, clickthrough_filepath):
         runner = CliRunner()
         output = tempfile.NamedTemporaryFile()
@@ -70,36 +100,6 @@ class TestMain(object):
             query_filepath, query_question_filepath, filename])
         assert result.exit_code != 0
         assert "No such " in str(result.exception)
-        assert isinstance(result.exception, RuntimeError)
-
-    def test_load(self, question_filepath, clickthrough_filepath):
-        runner = CliRunner()
-        result = runner.invoke(main, ["load"])
-        assert result.exit_code == 2
-        assert result.output.startswith('Usage:')
-        assert "Missing" in result.output
-
-        result = runner.invoke(main, ["load", 
-            question_filepath, clickthrough_filepath])
-        assert result.exit_code == 0
-
-        scf = SessionContextFactory()
-        with scf.create() as session:
-            cnt = session.query(olq.Question).count()
-            assert cnt == 5
-            cnt = session.query(olq.Clickthrough).count()
-            assert cnt == 5
-
-    def test_load_with_wrong_data(self, question_filepath, clickthrough_filepath):
-        runner = CliRunner()
-        result = runner.invoke(main, ["load", 
-            question_filepath, question_filepath])
-        assert result.exit_code != 0
-        assert isinstance(result.exception, RuntimeError)
-
-        result = runner.invoke(main, ["load", 
-            clickthrough_filepath, clickthrough_filepath])
-        assert result.exit_code != 0
         assert isinstance(result.exception, RuntimeError)
 
     def test_relevance(self, question_filepath, clickthrough_filepath):
@@ -116,47 +116,33 @@ class TestMain(object):
         probs = {}
         with open(filename) as f:
             for line in f:
+                print(line)
                 ls = [l.strip() for l in line.split("\t")]
                 probs[tuple(ls[:2])] = float(ls[-1])
 
         assert len(probs) == 5
-        assert probs[("OLQ-9998", "1167627151")] == 0.5 / exp(-0.1)
-        assert probs[("OLQ-9999", "1328077703")] == 0.5 / exp(-0.1)
-        assert probs[("OLQ-9999", "1414846259")] == 0.2 / exp(-0.2)
-        assert probs[("OLQ-9999", "1137083831")] == 0.2 / exp(-0.3)
-        assert probs[("OLQ-9999", "1348120213")] == 0.1 / exp(-0.4)
+        assert probs[("OLQ-9998", "1167627151")] == 4
+        assert probs[("OLQ-9999", "1328077703")] == 4
+        assert probs[("OLQ-9999", "1414846259")] == int(0.4 / exp(-0.1) * 4)
+        assert probs[("OLQ-9999", "1137083831")] == int(0.4 / exp(-0.2) * 4)
+        assert probs[("OLQ-9999", "1348120213")] == int(0.2 / exp(-0.3) * 4)
 
-    def test_judge(self, query_filepath, query_question_filepath,
-        question_filepath, clickthrough_filepath):
-        output = tempfile.NamedTemporaryFile()
-        f_filename = output.name
-        output.close()
-        output = tempfile.NamedTemporaryFile()
-        r_filename = output.name
-        output.close()
+    def test_judge(self, feature_filepath, relevance_filepath):
         output = tempfile.NamedTemporaryFile()
         j_filename = output.name
         output.close()
         runner = CliRunner()
-        result = runner.invoke(main, ["load", 
-            question_filepath, clickthrough_filepath])
-        assert result.exit_code == 0
-        result = runner.invoke(main, ["feature",
-            query_filepath, query_question_filepath, f_filename])
-        assert result.exit_code == 0
-        result = runner.invoke(main, ["relevance", r_filename])
-        assert result.exit_code == 0
 
-        result = runner.invoke(main, ["judge", 
-            f_filename, r_filename, j_filename, "--scale", "4.0"])
+        result = runner.invoke(main, ["judge",
+            feature_filepath, relevance_filepath, j_filename])
         assert result.exit_code == 0
 
         with open(j_filename) as f:
             lines = f.readlines()
         assert len(lines) == 4
-        assert lines[0].startswith("2")
-        assert lines[1].startswith("2")
-        assert lines[2].startswith("1")
+        assert lines[0].startswith("4")
+        assert lines[1].startswith("4")
+        assert lines[2].startswith("3")
         assert lines[3].startswith("1")
 
     @pytest.fixture
@@ -178,3 +164,13 @@ class TestMain(object):
     def clickthrough_filepath(self):
         return os.path.join(os.path.dirname(__file__),
             "fixtures", "sample_clickthrough.tsv")
+
+    @pytest.fixture
+    def feature_filepath(self):
+        return os.path.join(os.path.dirname(__file__),
+            "fixtures", "sample_features.tsv")
+
+    @pytest.fixture
+    def relevance_filepath(self):
+        return os.path.join(os.path.dirname(__file__),
+            "fixtures", "sample_relevances.tsv")
