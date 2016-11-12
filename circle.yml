@@ -10,7 +10,6 @@ dependencies:
         - git clone --depth 1 https://github.com/neologd/mecab-ipadic-neologd.git
         - cd mecab-ipadic-neologd && sudo ./bin/install-mecab-ipadic-neologd -y
         - sudo sed -i 's/^dicdir.*/dicdir=\/usr\/lib\/mecab\/dic\/mecab-ipadic-neologd/g' /etc/mecabrc
-        - sh download_ranklib.sh
 test:
   override:
     - py.test
