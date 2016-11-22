@@ -6,4 +6,5 @@ app = Flask(__name__)
 def index():
     import openliveq as olq
     q = olq.Question()
-    return render_template('index.html', msg=str(q))
+    cm = olq.ClickModel.estimate
+    return render_template('index.html', msg=str(q) + str(cm))
