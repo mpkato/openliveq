@@ -8,6 +8,9 @@ manager = Manager(app)
 def query_load(filepath):
     from web.query import Query
     from openliveq.db import SessionContextFactory
+
+    print("query_filepath: %s" % filepath)
+
     scf = SessionContextFactory()
     with scf.create() as session:
         with open(filepath) as f:
@@ -15,6 +18,7 @@ def query_load(filepath):
                 q = Query.readline(line)
                 session.add(q)
         session.commit()
+        print("%s queries loaded" % session.query(Query).count())
 
 @manager.command
 def unload():
