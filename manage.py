@@ -5,11 +5,9 @@ import os, sys
 manager = Manager(app)
 
 @manager.command
-def query_load():
+def query_load(filepath):
     from web.query import Query
     from openliveq.db import SessionContextFactory
-    filepath = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-        "..", "resources", "OpenLiveQ-queries-test.tsv")
     scf = SessionContextFactory()
     with scf.create() as session:
         with open(filepath) as f:

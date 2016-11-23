@@ -1,4 +1,4 @@
-from fabric.api import env, cd, run, put
+from fabric.api import env, cd, run, put, local
 from fabric.contrib.files import exists
 from settings import HOST, REMOTE_HOME, REMOTE_PYTHON_HOME, KEY_PATH
 import sys
@@ -10,6 +10,7 @@ env.hosts = [HOST]
 env.key_filename = KEY_PATH
 
 def deploy():
+    local("git push origin web")
     with cd(REMOTE_HOME):
         run("mv %s ./" % DBPATH)
         if exists("current"):
@@ -38,17 +39,22 @@ def load():
             sys.exit(1)
         with cd("current"):
             run("""%s/bin/openliveq load \
-            ../resources/OpenLiveQ-question-data.tsv \
-            ../resources/OpenLiveQ-clickthrough.tsv""" % REMOTE_PYTHON_HOME)
+                ../resources/OpenLiveQ-question-data.tsv \
+                ../resources/OpenLiveQ-clickthrough.tsv""" % REMOTE_PYTHON_HOME)
 
         if not exists("resources/OpenLiveQ-queries-test.tsv"):
             print("File not found: OpenLiveQ-queries-test.tsv")
             sys.exit(1)
 
         with cd("current"):
-            run("%s/bin/python manage.py query_load" % REMOTE_PYTHON_HOME)
+            run("""%s/bin/python manage.py query_load \
+                ../resources/OpenLiveQ-queries-test.tsv""" % REMOTE_PYTHON_HOME)
 
 def unload():
     with cd(REMOTE_HOME):
         with cd("current"):
             run("%s/bin/python manage.py unload" % REMOTE_PYTHON_HOME)
+
+def reload():
+    unload()
+    load()
