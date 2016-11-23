@@ -1,0 +1,31 @@
+.serp {
+    font-family: "メイリオ","Hiragino Kaku Gothic ProN","MS PGothic","MS UI Gothic",Helvetica,Arial,sans-serif !important;
+    line-height: 1.56;
+}
+
+.serp li {
+    list-style: none;
+    margin-bottom: 20px;
+}
+
+.title {
+    color: #0000de;
+    font-size: 123%;
+    text-decoration: underline;
+}
+
+.snippet {
+    font-size: small;
+    margin-bottom: 3px;
+}
+
+.details {
+    font-size: small;
+    color: #777;
+}
+
+.category {
+    font-size: small;
+    color: #777;
+    text-decoration: underline;
+}

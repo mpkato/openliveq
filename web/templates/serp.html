@@ -2,18 +2,28 @@
 {% block content %}
 <div class="wall">
   <div class="container">
+    {% for q in questions %}
     <div class="row">
-      <div class="col-md-6">
-      <table class="table">
-        <tr>
-            <td>1</td><td>ABC</td>
-        </tr>
-        <tr>
-            <td>2</td><td>XYZ</td>
-        </tr>
-      </table>
+      <div class="col-xs-8">
+        <ul class="serp">
+            <li>
+                <div class="question">
+                    <div class="title">{{ q.title }}</div>
+                    <div class="snippet">{{ q.snippet }}</div>
+                    <div class="details">
+                    {{ q.status }} - 更新日時:{{ q.updated_at }} - 回答数：{{
+                        q.answer_num }} - 閲覧数：{{ q.view_num }}
+                    </div>
+                    <div class="category">{{ q.category }}</div>
+                </div>
+            </li>
+        </ul>
+      </div>
+      <div class="col-xs-2">
+        <input type="checkbox"/>
       </div>
     </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}
