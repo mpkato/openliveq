@@ -14,9 +14,10 @@ def unload():
     from openliveq.db import SessionContextFactory
     scf = SessionContextFactory()
     engine = scf.session_factory.engine
-    olq.Question.__table__.drop(engine)
-    olq.Clickthrough.__table__.drop(engine)
-    Query.__table__.drop(engine)
+    olq.Question.__table__.drop(engine, checkfirst=True)
+    olq.Clickthrough.__table__.drop(engine, checkfirst=True)
+    Query.__table__.drop(engine, checkfirst=True)
+    print("DONE!")
 
 if __name__ == "__main__":
     manager.run()
