@@ -11,8 +11,7 @@ env.key_filename = KEY_PATH
 
 def deploy():
     with cd(REMOTE_HOME):
-        if exists(DBPATH):
-            run("mv %s ./" % DBPATH)
+        run("mv %s ./" % DBPATH)
         if exists("current"):
             run("rm -rf current")
             run("mkdir current")
@@ -22,8 +21,7 @@ def deploy():
         with cd("current"):
             run("%s/bin/python setup.py install --force" % REMOTE_PYTHON_HOME)
             run("%s/bin/pip install -r web_requirements.txt" % REMOTE_PYTHON_HOME)
-        if exists("db.sqlite3"):
-            run("mv db.sqlite3 %s" % DBPATH)
+        run("mv db.sqlite3 %s" % DBPATH)
         run('touch .uwsgi_touch')
 
 def upload(filepath):
