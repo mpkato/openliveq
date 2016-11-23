@@ -31,7 +31,6 @@ def upload(filepath):
         put(filepath, "resources/")
 
 def load():
-    from web.query import Query
     with cd(REMOTE_HOME):
         if not exists("resources/OpenLiveQ-question-data.tsv")\
             or not exists("resources/OpenLiveQ-clickthrough.tsv"):
@@ -43,7 +42,11 @@ def load():
             ../resources/OpenLiveQ-question-data.tsv \
             ../resources/OpenLiveQ-clickthrough.tsv""" % REMOTE_PYTHON_HOME)
 
-        if not exist("resources/OpenLiveQ-queries-test.tsv"):
+        if not exists("resources/OpenLiveQ-queries-test.tsv"):
             print("File not found: OpenLiveQ-queries-test.tsv")
             sys.exit(1)
 
+def unload():
+    with cd(REMOTE_HOME):
+        with cd("current"):
+            run("%s/bin/python manage.py unload" % REMOTE_PYTHON_HOME)
