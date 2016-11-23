@@ -45,6 +45,9 @@ def load():
             print("File not found: OpenLiveQ-queries-test.tsv")
             sys.exit(1)
 
+        with cd("current"):
+            run("%s/bin/python manage query_load")
+
 def unload():
     with cd(REMOTE_HOME):
         with cd("current"):

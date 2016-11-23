@@ -1,11 +1,21 @@
 from flask_script import Manager
 from web.app import app
+import os, sys
 
 manager = Manager(app)
 
 @manager.command
 def query_load():
-    print("hello")
+    from web.query import Query
+    filepath = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+        "..", "resources", "OpenLiveQ-queries-test.tsv")
+    scf = SessionContextFactory()
+    with scf.create() as session:
+        with open(filepath) as f:
+            for line in f:
+                q = Query.readline(line)
+                session.add(q)
+        session.commit()
 
 @manager.command
 def unload():
