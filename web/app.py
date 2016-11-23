@@ -1,8 +1,8 @@
 from flask import Flask, render_template, jsonify, request, g
 import openliveq as olq
-from .query import Query
-from .user import User
-from .evaluation import Evaluation
+from web.query import Query
+from web.user import User
+from web.evaluation import Evaluation
 from openliveq.db import SessionContextFactory
 
 app = Flask(__name__)
