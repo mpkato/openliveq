@@ -1,3 +1,19 @@
+.query {
+    background-color: #d2002b !important;
+    color: white;
+    font-size: 123%;
+    padding: 20px 5px 20px 5px;
+    margin-bottom: 10px;
+}
+.query strong {
+    font-size: 150%;
+}
+
+.instruction {
+    padding: 0 5px 0 5px;
+    margin-bottom: 50px;
+}
+
 .serp {
     font-family: "メイリオ","Hiragino Kaku Gothic ProN","MS PGothic","MS UI Gothic",Helvetica,Arial,sans-serif !important;
     line-height: 1.56;
@@ -12,6 +28,8 @@
     color: #0000de;
     font-size: 123%;
     text-decoration: underline;
+    font-weight: normal !important;
+    cursor: pointer;
 }
 
 .snippet {
@@ -28,4 +46,35 @@
     font-size: small;
     color: #777;
     text-decoration: underline;
+}
+
+label.form {
+    display: block;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    background-color: #5bc0de;
+    padding: 10px 0 10px 0;
+    cursor: pointer;
+}
+label.checked {
+    background-color: #d9534f;
+}
+.form input {
+    display: none;
+}
+.checkboxlabel span {
+    font-size: 150%;
+}
+
+.row {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  flex-wrap: wrap;
+}
+.row > [class*='col-'] {
+  display: flex;
+  flex-direction: column;
 }
