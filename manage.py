@@ -7,6 +7,7 @@ manager = Manager(app)
 @manager.command
 def query_load():
     from web.query import Query
+    from openliveq.db import SessionContextFactory
     filepath = os.path.join(os.path.abspath(os.path.dirname(__file__)),
         "..", "resources", "OpenLiveQ-queries-test.tsv")
     scf = SessionContextFactory()

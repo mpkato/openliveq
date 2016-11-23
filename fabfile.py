@@ -46,7 +46,7 @@ def load():
             sys.exit(1)
 
         with cd("current"):
-            run("%s/bin/python manage query_load")
+            run("%s/bin/python manage.py query_load" % REMOTE_PYTHON_HOME)
 
 def unload():
     with cd(REMOTE_HOME):
