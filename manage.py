@@ -14,7 +14,6 @@ def unload():
     from openliveq.db import SessionContextFactory
     scf = SessionContextFactory()
     engine = scf.session_factory.engine
-    engine.drop(olq.Question.__table__)
     olq.Question.__table__.drop(engine, checkfirst=True)
     olq.Clickthrough.__table__.drop(engine, checkfirst=True)
     Query.__table__.drop(engine, checkfirst=True)

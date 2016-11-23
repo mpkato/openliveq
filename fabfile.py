@@ -21,6 +21,7 @@ def deploy():
         with cd("current"):
             run("%s/bin/python setup.py install --force" % REMOTE_PYTHON_HOME)
             run("%s/bin/pip install -r web_requirements.txt" % REMOTE_PYTHON_HOME)
+            run("rm -rf openliveq*") # avoid conflicts
         run("mv db.sqlite3 %s" % DBPATH)
         run('touch .uwsgi_touch')
 
