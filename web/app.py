@@ -11,6 +11,7 @@ def index():
 
 @app.route('/serp/<query_id>')
 def serp(query_id):
+    from .query import Query
     import openliveq as olq
     from openliveq.db import SessionContextFactory
     scf = SessionContextFactory()
