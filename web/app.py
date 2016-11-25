@@ -53,6 +53,7 @@ def questions(query_id, order):
 
     scf = SessionContextFactory()
     with scf.create() as session:
+        app.logger.warning("%s %s %s" % (g.user.user_id, query_id, order))
         schedule = Schedule.find(g.user.user_id, query_id, order)
         question_ids = json.loads(schedule.question_ids)
         questions = session.query(olq.Question)\

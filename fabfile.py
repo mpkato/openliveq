@@ -63,5 +63,5 @@ def reload():
 def init_schedule():
     with cd(REMOTE_HOME):
         with cd("current"):
-            run("%s/bin/python manage.py init_schedule" % (
+            run("%s/bin/python manage.py init_schedule %s" % (
                 REMOTE_PYTHON_HOME, NUM_SCHEDULES))
