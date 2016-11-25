@@ -3,7 +3,7 @@ var SERP = React.createClass({
     var changeForm = this.changeForm;
     var questions = this.state.data.map(function (question) {
       return (
-        <div className="row">
+        <div className="row" key={question.question_id}>
           <div className="col-xs-8 col-xs-offset-1">
             <ul className="serp">
               <li>
@@ -95,7 +95,8 @@ var QuestionForm = React.createClass({
             checked={q.evaluation}
             onChange={this.changeSelection} />
             <div className="checkboxlabel">
-                <span>{q.evaluation ? "選択済" : "未選択"}</span>
+                <span>クリック<br />
+                {q.evaluation ? "したい" : "したくない"}</span>
             </div>
         </label>
     );
@@ -105,9 +106,9 @@ var QuestionForm = React.createClass({
   },
 });
 
-var query_id = $("#query").data("query");
+var query_id = $("#meta").data("query");
+var order = $("#meta").data("order");
 ReactDOM.render(
-  <SERP url={"/api/questions/" + query_id} />,
+  <SERP url={"/api/" + query_id + "/" + order} />,
   document.getElementById('content')
 );
-

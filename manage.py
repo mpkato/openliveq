@@ -23,6 +23,7 @@ def query_load(filepath):
 @manager.command
 def unload():
     from web.query import Query
+    from web.schedule import Schedule
     import openliveq as olq
     from openliveq.db import SessionContextFactory
     scf = SessionContextFactory()
@@ -30,6 +31,13 @@ def unload():
     olq.Question.__table__.drop(engine, checkfirst=True)
     olq.Clickthrough.__table__.drop(engine, checkfirst=True)
     Query.__table__.drop(engine, checkfirst=True)
+    Schedule.__table__.drop(engine, checkfirst=True)
+
+@manager.command
+def init_schedule(num):
+    from web.schedule import Schedule
+    for user_id in range(1, int(num)+1):
+        Schedule.init(user_id)
 
 if __name__ == "__main__":
     manager.run()

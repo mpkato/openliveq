@@ -4,7 +4,8 @@
   <div class="container">
     <div class="row">
       <div class="col-xs-10 col-xs-offset-1">
-        <div id="query" class="query" data-query="{{ query.query_id }}">
+        <div id="meta" data-query="{{ query.query_id }}" data-order="{{ order }}"></div>
+        <div class="query">
             検索キーワード：<strong>{{ query.body }}</strong>
         </div>
         <div class="instruction">
@@ -48,6 +49,16 @@
       </div>
     </div>
     {% endfor %}
+    <div class="row">
+      <div class="col-xs-10 col-xs-offset-1">
+        <div class="next text-center">
+          <a class="btn btn-default btn-lg btn-block" 
+            href="{{ url_for('next', query_id=query.query_id, order=order) }}">
+            次へ
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

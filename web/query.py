@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Index
-from openliveq.db import Base
+from openliveq.db import Base, SessionContextFactory
 
 class Query(Base):
     __tablename__ = 'queries'
@@ -14,3 +14,11 @@ class Query(Base):
                 % (cls.__name__, line))
         result = Query(query_id=ls[0], body=ls[1])
         return result
+
+    @classmethod
+    def find(cls, query_id):
+        scf = SessionContextFactory()
+        with scf.create() as session:
+            query = session.query(Query)\
+                .filter(Query.query_id == query_id).first()
+        return query

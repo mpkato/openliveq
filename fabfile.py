@@ -1,6 +1,7 @@
 from fabric.api import env, cd, run, put, local
 from fabric.contrib.files import exists
-from settings import HOST, REMOTE_HOME, REMOTE_PYTHON_HOME, KEY_PATH
+from settings import (HOST, REMOTE_HOME, REMOTE_PYTHON_HOME, KEY_PATH,
+    NUM_SCHEDULES)
 import sys
 
 DBPATH = "%s/lib/python3.5/site-packages/" % REMOTE_PYTHON_HOME\
@@ -58,3 +59,9 @@ def unload():
 def reload():
     unload()
     load()
+
+def init_schedule():
+    with cd(REMOTE_HOME):
+        with cd("current"):
+            run("%s/bin/python manage.py init_schedule" % (
+                REMOTE_PYTHON_HOME, NUM_SCHEDULES))
