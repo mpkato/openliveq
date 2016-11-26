@@ -36,12 +36,12 @@ var SERP = React.createClass({
     });
   },
   changeForm: function(question_id) {
-    var submitdata = {evaluations: this.state.data.map(function (question) {
-        if (question.question_id != question_id)
-          return {question_id: question.question_id, evaluation: question.evaluation};
-        else
-          return {question_id: question.question_id, evaluation: !question.evaluation};
+    var submitdata = {evaluations: this.state.data.map(function (question, i) {
+        if (question.question_id == question_id)
+          question.evaluation = !question.evaluation;
+        return {question_id: question.question_id, evaluation: question.evaluation};
     })};
+    this.setState({data: this.state.data});
     $.ajax({
       url: this.props.url,
       dataType: 'json',
