@@ -26,3 +26,7 @@ class Collection(object):
                 self.cf[w] += wordsets[label][w]
                 self.cn += wordsets[label][w]
         self.dn += 1
+
+    @property
+    def avgdlen(self):
+        return float(self.cn) / self.dn
