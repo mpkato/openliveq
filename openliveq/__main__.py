@@ -7,9 +7,14 @@ from .feature_factory import FeatureFactory
 from .instance import Instance
 from .click_model import ClickModel
 from .db import BULK_RATE, SessionContextFactory
+from .validation import Validation
 from collections import defaultdict
 import sys, os
 import click
+
+FILES = ['OpenLiveQ-queries-train.tsv', 'OpenLiveQ-queries-test.tsv',
+    'OpenLiveQ-questions-train.tsv', 'OpenLiveQ-questions-test.tsv']
+
 
 @click.group(invoke_without_command=True)
 @click.pass_context
@@ -58,6 +63,37 @@ def load(question_file, clickthrough_file, verbose):
     with scf.create() as session:
         print("%d questions loaded" % session.query(Question).count())
         print("%d clickthroughs loaded" % session.query(Clickthrough).count())
+
+@main.command(help='''
+    File validation of the OpenLiveQ data
+    \b
+    Arguments:
+        DATA_DIR:          path to the OpenLiveQ data directory
+''')
+@click.argument('data_dir', required=True, type=str)
+def valfiles(data_dir):
+    if not os.path.isdir(data_dir):
+        print("'%s' does not exist or is not a directory" % data_dir)
+        sys.exit(0)
+    print(Validation.file_validation.__doc__.strip())
+
+    for filename in FILES:
+        filepath = os.path.join(data_dir, filename)
+        if not os.path.exists(filepath):
+            print("'%s' does not exist" % filepath)
+            sys.exit(0)
+
+    Validation.file_validation(*[os.path.join(data_dir, filename)
+        for filename in FILES])
+    print('OK')
+
+@main.command(help='''
+    DB validation of the OpenLiveQ data
+''')
+def valdb():
+    print(Validation.db_validation.__doc__.strip())
+    Validation.db_validation()
+    print('OK')
 
 @main.command(help='''
     Feature extraction from query-question pairs
