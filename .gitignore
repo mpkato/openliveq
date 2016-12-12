@@ -93,3 +93,6 @@ ENV/
 
 # DB files
 *.sqlite3
+
+# data dir
+/data
