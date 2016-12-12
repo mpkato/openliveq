@@ -39,11 +39,25 @@ $ openliveq load data/OpenLiveQ-question-data.tsv \
     question_file:     data/OpenLiveQ-question-data.tsv
     clickthrough_file: data/OpenLiveQ-questions-train.tsv
 
-xxxx questions loaded
-xxxx clickthroughs loaded
+1967274 questions loaded
+440163 clickthroughs loaded
+
+# data validation
+$ openliveq valdb
+DB Validation
+OK
+
+# file validation
+$ openliveq valfiles data
+File Validation
+data/OpenLiveQ-queries-train.tsv
+data/OpenLiveQ-queries-test.tsv
+data/OpenLiveQ-questions-train.tsv
+data/OpenLiveQ-questions-test.tsv
+OK
 
 # extract features from query-question pairs
-$ openliveq feature data/OpenLiveQ-questions-train.tsv \
+$ openliveq feature data/OpenLiveQ-queries-train.tsv \
 > data/OpenLiveQ-questions-train.tsv \
 > data/OpenLiveQ-features-train.tsv
 query_file:          data/OpenLiveQ-questions-train.tsv
@@ -54,7 +68,7 @@ Loading queries and questions ...
 
 Extracting features ...
 
-$ openliveq feature data/OpenLiveQ-questions-test.tsv \
+$ openliveq feature data/OpenLiveQ-queries-test.tsv \
 > data/OpenLiveQ-questions-test.tsv \
 > data/OpenLiveQ-features-test.tsv
 query_file:          data/OpenLiveQ-questions-test.tsv
@@ -124,6 +138,32 @@ This command stores question and clickthrough data into a SQLite database at `op
 See our homepage for the file formats: [NTCIR-13 OpenLiveQ](http://www.openliveq.net/).
 
 This step is necesaary before running the other commands, but only once.
+
+### valdb
+```bash
+Usage: openliveq valdb [OPTIONS]
+
+  DB validation of the OpenLiveQ data
+
+Options:
+  --help  Show this message and exit.
+```
+This command validates question and clickthrough data stored in the SQLite database. This command is optional.
+
+### valfiles
+```bash
+Usage: openliveq valfiles [OPTIONS] DATA_DIR
+
+  File validation of the OpenLiveQ data
+
+  Arguments:
+      DATA_DIR:          path to the OpenLiveQ data directory
+
+Options:
+  --help  Show this message and exit.
+```
+This command validates query and question files in a directory.
+This command is optional.
 
 ### feature
 ```bash

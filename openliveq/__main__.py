@@ -66,6 +66,7 @@ def load(question_file, clickthrough_file, verbose):
 
 @main.command(help='''
     File validation of the OpenLiveQ data
+
     \b
     Arguments:
         DATA_DIR:          path to the OpenLiveQ data directory
@@ -120,34 +121,41 @@ def feature(query_file, query_question_file, output_file, verbose):
     queries = {q.query_id: q for q in queries}
     query_file.close()
     qqs = QueryQuestion.load(query_question_file)
+    question_ids = defaultdict(list)
+    for qq in qqs:
+        question_ids[qq.query_id].append(qq.question_id)
     query_question_file.close()
 
     ff = FeatureFactory()
     collection = Collection()
     scf = SessionContextFactory(echo=verbose)
     with scf.create() as session:
-        for question in session.query(Question):
-            ws = ff.parse_question(question)
-            collection.add(ws)
+        query_ids = [q[0] for q
+            in session.query(Question.query_id).distinct().all()]
+        for query_id in query_ids:
+            print('\tProcessing questions for query %s' % query_id)
+            for question in session.query(Question)\
+                .filter(Question.query_id == query_id).all():
+                ws = ff.parse_question(question)
+                collection.add(ws)
+            break
     print()
 
     print("Extracting features ...")
-    tmpqids = {}
     with scf.create() as session:
-        for qq in qqs:
-            if not qq.query_id in tmpqids:
-                tmpqids[qq.query_id] = len(tmpqids) + 1
-            tmpqid = tmpqids[qq.query_id]
-            query = queries[qq.query_id]
-            question = session.query(Question).\
-                filter(
-                    Question.query_id == qq.query_id,
-                    Question.question_id == qq.question_id).first()
-            if question is None:
-                raise RuntimeError("No such question in DB: %s, %s"
-                    % (qq.query_id, qq.question_id))
-            instance = ff.extract(query, question, collection)
-            Instance.dump(tmpqid, instance, output_file)
+        for idx, query_id in enumerate(sorted(queries.keys())):
+            tmpqid = idx + 1
+            query = queries[query_id]
+            questions = session.query(Question)\
+                .filter(Question.query_id == query_id).all()
+            questions = {q.question_id: q for q in questions}
+            for question_id in question_ids[query_id]:
+                if not question_id in questions:
+                    raise RuntimeError("No such question in DB: %s, %s"
+                        % (query_id, question_id))
+                question = questions[question_id]
+                instance = ff.extract(query, question, collection)
+                Instance.dump(tmpqid, instance, output_file)
     output_file.close()
 
 @main.command(help='''
