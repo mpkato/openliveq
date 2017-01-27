@@ -73,6 +73,8 @@ def log_tfidf_sum(q, d, c):
     """
     result = 0.0
     dlen = sum(d.values())
+    if dlen == 0:
+        return result
     for w in set(q) & set(d):
         result += log(float(d[w]) / dlen\
             * log(float(c.dn) / c.df[w] + 1))
@@ -93,6 +95,8 @@ def tf_in_idf_sum(q, d, c):
     """
     result = 0.0
     dlen = sum(d.values())
+    if dlen == 0:
+        return result
     for w in set(q) & set(d):
         result += log(float(d[w]) / dlen\
             * float(c.dn) / c.cf[w] + 1)
@@ -108,6 +112,8 @@ def bm25(q, d, c, k1=2.5, b=0.8):
     """
     result = 0.0
     dlen = sum(d.values())
+    if dlen == 0:
+        return result
     for w in set(q) & set(d):
         result += _bm25_idf(w, c) * d[w] * (k1 + 1)\
             / (d[w] + k1 * (1 - b + b * dlen / c.avgdlen))
@@ -136,6 +142,8 @@ def lm_dir(q, d, c, mu=50.0):
     """
     result = 0.0
     dlen = sum(d.values())
+    if dlen == 0:
+        return result
     qlen = sum(q.values())
     alpha = mu / (dlen + mu)
     for w in set(q):
@@ -153,6 +161,8 @@ def lm_jm(q, d, c, Lambda=0.5):
     """
     result = 0.0
     dlen = sum(d.values())
+    if dlen == 0:
+        return result
     qlen = sum(q.values())
     for w in set(q):
         pwc = _lm_pwc(w, c)
@@ -170,6 +180,8 @@ def lm_abs(q, d, c, delta=0.5):
     """
     result = 0.0
     dlen = sum(d.values())
+    if dlen == 0:
+        return result
     qlen = sum(q.values())
     alpha = delta * len(d) / dlen
     for w in set(q):

@@ -138,12 +138,12 @@ def feature(query_file, query_question_file, output_file, verbose):
                 .filter(Question.query_id == query_id).all():
                 ws = ff.parse_question(question)
                 collection.add(ws)
-            break
     print()
 
     print("Extracting features ...")
     with scf.create() as session:
         for idx, query_id in enumerate(sorted(queries.keys())):
+            print('\tProcessing questions for query %s' % query_id)
             tmpqid = idx + 1
             query = queries[query_id]
             questions = session.query(Question)\
