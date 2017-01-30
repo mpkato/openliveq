@@ -4,6 +4,7 @@ import json
 import openliveq as olq
 from web.query import Query
 from web.user import User
+from web.user_log import UserLog
 from web.schedule import Schedule
 from web.status import Status
 from web.evaluation import Evaluation
@@ -81,57 +82,13 @@ def questions(query_id, order):
     GET: Return the <order>-th list of questions for <query_id>
     POST: Update the evaluations based on the posted data and do the same as GET
     '''
+    user_id = g.user.user_id
     if request.method == 'POST':
-        _questions_post(query_id)
+        newevals = request.json.get("evaluations")
+        Evaluation.update(query_id, user_id, newevals)
 
-    scf = SessionContextFactory()
-    with scf.create() as session:
-        schedule = Schedule.find(g.user.user_id, query_id, order)
-        question_ids = json.loads(schedule.question_ids)
-        questions = session.query(olq.Question)\
-            .filter(olq.Question.query_id == query_id,
-            olq.Question.question_id.in_(question_ids)).all()
-    evaluations = Evaluation.find_votes(
-        g.user.user_id, query_id, question_ids)
-    questions = _process_questions(questions, evaluations)
-    questions = _order_questions(question_ids, questions)
+    questions = Evaluation.find_questions(user_id, query_id, order)
     return jsonify(questions)
-
-def _questions_post(query_id):
-    '''
-    Update the evaluations based on the posted data
-    '''
-    newevals = request.json.get("evaluations")
-    newevals = {e["question_id"]: e["evaluation"] for e in newevals}
-    scf = SessionContextFactory()
-    with scf.create() as session:
-        evaluations = session.query(Evaluation)\
-            .filter(Evaluation.query_id == query_id,
-            Evaluation.user_id == g.user.user_id,
-            Evaluation.question_id.in_(list(newevals.keys()))).all()
-        evaluations = {e.question_id: e for e in evaluations}
-        for question_id in newevals:
-            evaluations[question_id].vote = newevals[question_id]
-        session.commit()
-
-def _process_questions(questions, evaluations):
-    '''
-    Convert questions and evaluations to dict
-    '''
-    for q in questions:
-        q.updated_at = q.updated_at.strftime("%Y/%m/%d %H:%M:%S")
-    questions = [{a: getattr(q, a) for a in q.ORDERED_ATTRS}
-        for q in questions]
-    for q in questions:
-        q["evaluation"] = evaluations[q["question_id"]]
-    return questions
-
-def _order_questions(question_ids, questions):
-    '''
-    Order questions in the oder of question_ids
-    '''
-    questions = {q["question_id"]: q for q in questions}
-    return [questions[qid] for qid in question_ids]
 
 @app.before_request
 def get_user_cookie():
@@ -141,6 +98,12 @@ def get_user_cookie():
     user_id = request.cookies.get('user_id')
     user = User.find(user_id)
     g.user = user
+
+    if request.path != '/' and user is None:
+        return redirect(url_for('index'))
+
+    if user is not None:
+        UserLog.create(user.user_id, request.path)
 
 @app.after_request
 def set_user_cookie(response):

@@ -107,3 +107,10 @@ class Status(Base):
             statuses = session.query(Status)\
                 .filter(Status.user_id == user_id).all()
         return statuses
+
+    @classmethod
+    def cleanup(cls, max_time_interval):
+        scf = SessionContextFactory()
+        with scf.create() as session:
+            statuses = session.query(Status)\
+                .filter(Status.is_done == False).all()

@@ -73,8 +73,9 @@ class Schedule(Base):
                 .filter(Schedule.user_id == user_id,
                 Schedule.query_id == query_id,
                 Schedule.order == order).first()
-            schedule.is_done = True
-            session.commit()
+            if schedule is not None:
+                schedule.is_done = True
+                session.commit()
 
     @classmethod
     def find_next(cls, user_id, query_id):
