@@ -6,6 +6,9 @@ manager = Manager(app)
 
 @manager.command
 def query_load(filepath):
+    '''
+    Load a set of queries from a given filepath
+    '''
     from web.query import Query
     from openliveq.db import SessionContextFactory
 
@@ -22,6 +25,9 @@ def query_load(filepath):
 
 @manager.command
 def unload():
+    '''
+    Drop all the data from the table
+    '''
     from web.query import Query
     from web.schedule import Schedule
     import openliveq as olq
@@ -35,6 +41,9 @@ def unload():
 
 @manager.command
 def init_schedule(num):
+    '''
+    Initialize [num] user schedules for a given [num]
+    '''
     from web.schedule import Schedule
     for user_id in range(1, int(num)+1):
         Schedule.init(user_id)
