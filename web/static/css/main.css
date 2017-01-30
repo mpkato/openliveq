@@ -91,3 +91,11 @@ label.checked {
   display: flex;
   flex-direction: column;
 }
+
+.code {
+    font-size: 24pt;
+    text-align: center;
+    background-color: white;
+    border: 1px solid black;
+    padding: 10px;
+}

@@ -1,8 +1,11 @@
 import pytest
 import os, shutil
+import re
 from web.app import app
 
 class TestApp(object):
+    A_HREF = re.compile(r'<a [^>]*?href="(.*?)"[^>]*?>')
+
     @pytest.fixture
     def client(self):
         return app.test_client()

@@ -13,6 +13,7 @@ from openliveq.db import SessionContextFactory
 app = Flask(__name__)
 
 MAX_ASSIGNMENT = 5
+MAX_TIME_INTERVAL = 1800 # 30min
 
 @app.route('/')
 def index():
@@ -20,6 +21,7 @@ def index():
 
 @app.route('/start')
 def start():
+    Status.cleanup(MAX_TIME_INTERVAL)
     query_id = Status.find(g.user.user_id, MAX_ASSIGNMENT)
     if query_id is not None:
         # there is a query available
@@ -66,8 +68,9 @@ def next(query_id, order=None):
     else:
         # show finish page for this query
         Status.finalize(g.user.user_id, query_id)
+        code = UserLog.generate_code(g.user.user_id, query_id)
         query = Query.find(query_id)
-        return render_template('finish.html', query=query)
+        return render_template('finish.html', query=query, code=code)
 
 @app.route('/over')
 def over():

@@ -90,3 +90,14 @@ class Schedule(Base):
                 Schedule.is_done == False)\
                 .order_by(Schedule.order).first()
         return schedule
+
+
+    @classmethod
+    def find_all(cls, user_id, query_id):
+        scf = SessionContextFactory()
+        with scf.create() as session:
+            schedules = session.query(Schedule)\
+                .filter(Schedule.user_id == user_id,
+                Schedule.query_id == query_id)\
+                .order_by(Schedule.order).all()
+        return schedules

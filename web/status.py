@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Index, ForeignKey
 from sqlalchemy import func
 from openliveq.db import Base, SessionContextFactory
 from web.query import Query
+from web.user_log import UserLog
 import numpy as np
 
 class Status(Base):
@@ -110,7 +111,12 @@ class Status(Base):
 
     @classmethod
     def cleanup(cls, max_time_interval):
-        scf = SessionContextFactory()
-        with scf.create() as session:
-            statuses = session.query(Status)\
-                .filter(Status.is_done == False).all()
+        user_ids = UserLog.find_inactive_users(max_time_interval)
+        if len(user_ids) > 0:
+            scf = SessionContextFactory()
+            with scf.create() as session:
+                session.query(Status)\
+                    .filter(Status.is_done == False,
+                    Status.user_id.in_(user_ids))\
+                    .delete(synchronize_session=False)
+                session.commit()

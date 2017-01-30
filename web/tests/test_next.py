@@ -8,7 +8,6 @@ from web.user import User
 from web.tests.test_app import TestApp
 
 class TestNext(TestApp):
-    A_HREF = re.compile(r'<a [^>]*?href="(.*?)"[^>]*?>')
 
     def test_next(self, client):
         url = '/'
