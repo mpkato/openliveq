@@ -11,7 +11,7 @@ from openliveq.db import SessionContextFactory
 
 app = Flask(__name__)
 
-MAX_ASSIGNMENT = 15
+MAX_ASSIGNMENT = 5
 
 @app.route('/')
 def index():
@@ -21,14 +21,19 @@ def index():
 def start():
     query_id = Status.find(g.user.user_id, MAX_ASSIGNMENT)
     if query_id is not None:
+        # there is a query available
         Status.init(g.user.user_id, query_id)
         schedule = Schedule.find_next(g.user.user_id, query_id)
         if schedule is not None:
+            # there is a schedule available
             return redirect(url_for('serp',
                 query_id=query_id, order=schedule.order))
         else:
+            # there is no schedule for this query
+            # move to the next query
             return redirect(url_for('next', query_id=query_id, order=0))
     else:
+        # there is no available query
         return redirect(url_for('over'))
 
 @app.route('/<query_id>/<order>')
@@ -41,6 +46,34 @@ def serp(query_id, order):
     else:
         query = Query.find(query_id)
         return render_template('serp.html', query=query, order=order)
+
+@app.route('/next/<query_id>/')
+@app.route('/next/<query_id>/<order>')
+def next(query_id, order=None):
+    '''
+    Finalize the <order>-th list, and
+    Redirect to the next list of questions for <query_id>
+    '''
+    if order is not None:
+        # finalize a schedule
+        Schedule.finalize(g.user.user_id, query_id, order)
+    schedule = Schedule.find_next(g.user.user_id, query_id)
+    if schedule is not None:
+        # use the next schedule
+        return redirect(url_for('serp',
+            query_id=query_id, order=schedule.order))
+    else:
+        # show finish page for this query
+        Status.finalize(g.user.user_id, query_id)
+        query = Query.find(query_id)
+        return render_template('finish.html', query=query)
+
+@app.route('/over')
+def over():
+    '''
+    Show the over page
+    '''
+    return render_template('over.html')
 
 @app.route('/api/<query_id>/<order>', methods=['POST', 'GET'])
 def questions(query_id, order):
@@ -63,29 +96,6 @@ def questions(query_id, order):
     questions = _process_questions(questions, evaluations)
     questions = _order_questions(question_ids, questions)
     return jsonify(questions)
-
-@app.route('/next/<query_id>/<order>')
-def next(query_id, order):
-    '''
-    Finalize the <order>-th list, and
-    Redirect to the next list of questions for <query_id>
-    '''
-    Schedule.finalize(g.user.user_id, query_id, order)
-    schedule = Schedule.find_next(g.user.user_id, query_id)
-    if schedule is not None:
-        return redirect(url_for('serp',
-            query_id=query_id, order=schedule.order))
-    else:
-        Status.finalize(g.user.user_id, query_id)
-        query = Query.find(query_id)
-        return render_template('finish.html', query=query)
-
-@app.route('/over')
-def over():
-    '''
-    Show the over page
-    '''
-    return render_template('over.html')
 
 def _questions_post(query_id):
     '''
