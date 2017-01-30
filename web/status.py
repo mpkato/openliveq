@@ -81,7 +81,7 @@ class Status(Base):
             queries = [q.query_id for q in queries]
             np.random.seed(user_id)
             np.random.shuffle(queries)
-            counts = session.query(Status.query_id, 
+            counts = session.query(Status.query_id,
                 func.count(Status.user_id))\
                 .group_by(Status.query_id).all()
             counts = {c[0]: c[1] for c in counts}
@@ -94,6 +94,8 @@ class Status(Base):
         # should not be tackled
         queries = [q for q in queries if not q in done]
         if len(queries) > 0:
+            # give priority to queries with less count
+            queries = sorted(queries, key=lambda q: counts.get(q, 0))
             return queries[0]
         else:
             return None
