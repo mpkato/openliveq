@@ -31,7 +31,7 @@ def start():
         else:
             # there is no schedule for this query
             # move to the next query
-            return redirect(url_for('next', query_id=query_id, order=0))
+            return redirect(url_for('next', query_id=query_id))
     else:
         # there is no available query
         return redirect(url_for('over'))
