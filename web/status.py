@@ -99,3 +99,11 @@ class Status(Base):
             return queries[0]
         else:
             return None
+
+    @classmethod
+    def find_all_by_user_id(cls, user_id):
+        scf = SessionContextFactory()
+        with scf.create() as session:
+            statuses = session.query(Status)\
+                .filter(Status.user_id == user_id).all()
+        return statuses
