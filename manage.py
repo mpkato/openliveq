@@ -48,5 +48,24 @@ def init_schedule(num):
     for user_id in range(1, int(num)+1):
         Schedule.init(user_id)
 
+@manager.command
+def destroy():
+    '''
+    Drop the collected data from the table
+    '''
+    from web.user import User
+    from web.user_log import UserLog
+    from web.schedule import Schedule
+    from web.status import Status
+    from web.evaluation import Evaluation
+    from openliveq.db import SessionContextFactory
+    scf = SessionContextFactory()
+    engine = scf.session_factory.engine
+    User.__table__.drop(engine, checkfirst=True)
+    UserLog.__table__.drop(engine, checkfirst=True)
+    Schedule.__table__.drop(engine, checkfirst=True)
+    Status.__table__.drop(engine, checkfirst=True)
+    Evaluation.__table__.drop(engine, checkfirst=True)
+
 if __name__ == "__main__":
     manager.run()
