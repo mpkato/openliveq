@@ -23,7 +23,7 @@ class Schedule(Base):
     is_done = Column(Boolean)
 
     @classmethod
-    def init(cls, user_id):
+    def init(cls, user_id, query_id):
         '''
         Prepare chunks of question_ids for user_id.
         The order of question_ids is randomized with user_id as a seed
@@ -31,25 +31,24 @@ class Schedule(Base):
         scf = SessionContextFactory()
         with scf.create() as session:
             s = session.query(Schedule)\
-                .filter(Schedule.user_id == user_id).first()
+                .filter(Schedule.user_id == user_id,
+                Schedule.query_id == query_id).first()
             if s is not None:
                 return
-            queries = session.query(Query).all()
-            for q in queries:
-                question_ids = session.query(Question.question_id)\
-                    .filter(Question.query_id == q.query_id).all()
-                question_ids = [qid[0] for qid in question_ids]
-                np.random.seed(user_id)
-                np.random.shuffle(question_ids)
-                iternum = (len(question_ids) - 1) // cls.NUM_QUESTION + 1
-                for i in range(iternum):
-                    start = i*cls.NUM_QUESTION
-                    end = (i+1)*cls.NUM_QUESTION
-                    qids = question_ids[start:end]
-                    s = Schedule(user_id=user_id, query_id=q.query_id,
-                        order=i, question_ids=json.dumps(qids),
-                        is_done=False)
-                    session.add(s)
+            question_ids = session.query(Question.question_id)\
+                .filter(Question.query_id == query_id).all()
+            question_ids = [qid[0] for qid in question_ids]
+            np.random.seed(user_id)
+            np.random.shuffle(question_ids)
+            iternum = (len(question_ids) - 1) // cls.NUM_QUESTION + 1
+            for i in range(iternum):
+                start = i*cls.NUM_QUESTION
+                end = (i+1)*cls.NUM_QUESTION
+                qids = question_ids[start:end]
+                s = Schedule(user_id=user_id, query_id=query_id,
+                    order=i, question_ids=json.dumps(qids),
+                    is_done=False)
+                session.add(s)
             session.commit()
 
     @classmethod

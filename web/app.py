@@ -26,6 +26,7 @@ def start():
     if query_id is not None:
         # there is a query available
         Status.init(g.user.user_id, query_id)
+        Schedule.init(g.user.user_id, query_id)
         schedule = Schedule.find_next(g.user.user_id, query_id)
         if schedule is not None:
             # there is a schedule available
