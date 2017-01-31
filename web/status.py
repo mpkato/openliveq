@@ -42,8 +42,11 @@ class Status(Base):
             status = session.query(Status)\
                 .filter(Status.user_id == user_id,
                 Status.query_id == query_id).first()
-            status.is_done = True
-            session.commit()
+            if status is not None:
+                status.is_done = True
+                session.commit()
+
+        return (status is not None)
 
     @classmethod
     def is_valid(cls, user_id, query_id):

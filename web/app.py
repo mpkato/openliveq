@@ -68,10 +68,12 @@ def next(query_id, order=None):
             query_id=query_id, order=schedule.order))
     else:
         # show finish page for this query
-        Status.finalize(g.user.user_id, query_id)
-        code = UserLog.generate_code(g.user.user_id, query_id)
-        query = Query.find(query_id)
-        return render_template('finish.html', query=query, code=code)
+        if Status.finalize(g.user.user_id, query_id):
+            code = UserLog.generate_code(g.user.user_id, query_id)
+            query = Query.find(query_id)
+            return render_template('finish.html', query=query, code=code)
+        else:
+            return redirect(url_for('index'))
 
 @app.route('/over')
 def over():
