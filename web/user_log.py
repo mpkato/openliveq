@@ -10,7 +10,7 @@ class UserLog(Base):
     __tablename__ = 'user_logs'
     __table_args__ = (
         Index('user_logs_user_id_index', "user_id"),
-        Index('user_logs_user_id_query_id_index', "query_id"),
+        Index('user_logs_user_id_query_id_index', "user_id", "query_id"),
         Index('user_logs_user_id_created_at_index', "user_id", "created_at"),
         {'sqlite_autoincrement': True}
     )

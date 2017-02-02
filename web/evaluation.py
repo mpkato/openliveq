@@ -8,8 +8,10 @@ import openliveq as olq
 class Evaluation(Base):
     __tablename__ = 'evaluations'
     __table_args__ = (
-        Index('questions_user_id_index', "user_id"),
-        Index('questions_user_id_query_id_index', "user_id", "query_id"),
+        Index('evaluations_user_id_index', "user_id"),
+        Index('evaluations_user_id_query_id_index', "user_id", "query_id"),
+        Index('evaluations_user_id_query_id_question_id_index',
+            "user_id", "query_id", "question_id"),
         )
     user_id = Column(Integer, primary_key=True)
     query_id = Column(String(8), primary_key=True)

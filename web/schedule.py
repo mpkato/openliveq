@@ -15,6 +15,8 @@ class Schedule(Base):
             "user_id", "query_id", "order"),
         Index('schedules_user_id_query_id_is_done_index',
             "user_id", "query_id", "is_done"),
+        Index('schedules_user_id_query_id_is_done_order_index',
+            "user_id", "query_id", "is_done", "order"),
         )
     user_id = Column(Integer, primary_key=True)
     query_id = Column(String(8), primary_key=True)

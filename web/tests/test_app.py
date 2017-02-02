@@ -20,3 +20,9 @@ class TestApp(object):
         def fin_scope_function():
             shutil.copy(srcpath, dstpath)
         request.addfinalizer(fin_scope_function)
+
+    @classmethod
+    def setup_class(cls):
+        import logging
+        logging.basicConfig()
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
