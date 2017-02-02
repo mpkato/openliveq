@@ -7,6 +7,7 @@ class Question(Base):
     __table_args__ = (
         Index('questions_query_id_index', "query_id"),
         Index('questions_question_id_index', "question_id"),
+        Index('questions_query_id_question_id_index', "query_id", "question_id"),
         )
 
     ORDERED_ATTRS = ["query_id", "rank", "question_id", "title", "snippet",
