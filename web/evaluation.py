@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, Index, ForeignKey
+from sqlalchemy import func, case
 import json
 from openliveq.db import Base, SessionContextFactory
 from web.schedule import Schedule
@@ -90,3 +91,18 @@ class Evaluation(Base):
         '''
         questions = {q["question_id"]: q for q in questions}
         return [questions[qid] for qid in question_ids]
+
+    @classmethod
+    def summary(cls):
+        scf = SessionContextFactory()
+        with scf.create() as session:
+            evaluations = session.query(
+                Evaluation.user_id, Evaluation.query_id,
+                func.count(), func.sum(case([
+                    (Evaluation.vote == True, 1),
+                    (Evaluation.vote == False, 0)
+                ]))
+                )\
+                .group_by(Evaluation.user_id, Evaluation.query_id)\
+                .all()
+        return evaluations

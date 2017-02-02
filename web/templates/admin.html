@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="wall">
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-10 col-xs-offset-1">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>UID</th>
+                    <th>QID</th>
+                    <th># Evals</th>
+                    <th># Votes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for row in result %}
+                        {% for cell in row %}
+                            <td>{{ cell }}</td>
+                        {% endfor %}
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

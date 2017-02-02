@@ -96,11 +96,22 @@ def questions(query_id, order):
     questions = Evaluation.find_questions(user_id, query_id, order)
     return jsonify(questions)
 
+
+@app.route('/admin')
+def admin():
+    '''
+    Show the administration page
+    '''
+    result = Evaluation.summary()
+    return render_template('admin.html', result=result)
+
 @app.before_request
 def get_user_cookie():
     '''
     Set a user in the cookie to g.user
     '''
+    if request.path == '/admin':
+        return
     user_id = request.cookies.get('user_id')
     user = User.find(user_id)
     g.user = user
@@ -116,6 +127,8 @@ def set_user_cookie(response):
     '''
     Create a new user and set it to the cookie
     '''
+    if request.path == '/admin':
+        return response
     if g.user is None:
         user = User.create()
         response.set_cookie('user_id', value=str(user.user_id))
