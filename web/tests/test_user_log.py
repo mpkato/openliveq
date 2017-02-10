@@ -8,7 +8,7 @@ from web.user_log import UserLog
 from web.tests.test_app import TestApp
 
 class TestUserLog(TestApp):
-    CODE = re.compile(r'([0-9]{4})-([0-9]{4})-([0-9]{4})-([0-9]{4})')
+    CODE = re.compile(r'([0-9]{4})-([0-9]{4})-([0-9]{4})')
 
     def test_find_all(self, client):
         response = client.get('/', follow_redirects=True)
@@ -74,8 +74,8 @@ class TestUserLog(TestApp):
         match = self.CODE.search(response.data.decode())
         assert match is not None
         assert int(match.group(1)) == 0
+        assert int(match.group(2)) == 1
         assert int(match.group(3)) == 1
-        assert int(match.group(4)) == 1
 
         client = app.test_client()
         url = '/'
@@ -87,5 +87,5 @@ class TestUserLog(TestApp):
         match = self.CODE.search(response.data.decode())
         assert match is not None
         assert int(match.group(1)) == 1
-        assert int(match.group(3)) == 2
-        assert int(match.group(4)) == 3
+        assert int(match.group(2)) == 2
+        assert int(match.group(3)) == 3

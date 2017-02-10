@@ -21,7 +21,7 @@ class UserLog(Base):
     created_at = Column(DateTime)
 
     QUERY_ID = re.compile(r'OLQ-[0-4]{4}')
-    CODE = '%04d-%04d-%04d-%04d'
+    CODE = '%04d-%04d-%04d'
 
     @classmethod
     def create(cls, user_id, action):
@@ -90,9 +90,5 @@ class UserLog(Base):
         num_schedules = len(schedules)
         avg_ellapsed_time = 0.0 if num_schedules == 0\
             else int(ellapsed_time / num_schedules)
-        spice = np.random.randint(0, 1000)
         qid = int(query_id[4:])
-        if qid % 2 == 0:
-            return cls.CODE % (spice, avg_ellapsed_time, user_id, qid)
-        else:
-            return cls.CODE % (avg_ellapsed_time, spice, user_id, qid)
+        return cls.CODE % (avg_ellapsed_time, user_id, qid)
