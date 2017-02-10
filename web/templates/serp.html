@@ -27,11 +27,16 @@
     </div>
     <div class="row">
       <div class="col-xs-10 col-xs-offset-1">
-        <div class="next text-center">
-          <a class="btn btn-default btn-lg btn-block" 
-            href="{{ url_for('next', query_id=query.query_id, order=order) }}">
-            次へ
-          </a>
+        <div class="next">
+          <div class="text-center">
+            このページの閲覧開始から<span id="time"></span>秒経過
+          </div>
+          <div class="text-center">
+            <a class="btn btn-default btn-lg btn-block"
+              href="{{ url_for('next', query_id=query.query_id, order=order) }}">
+              次へ
+            </a>
+          </div>
         </div>
       </div>
     </div>
