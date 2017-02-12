@@ -60,6 +60,11 @@ def reload():
     unload()
     load()
 
+def destroy():
+    with cd(REMOTE_HOME):
+        with cd("current"):
+            run("""%s/bin/python manage.py destroy""" % REMOTE_PYTHON_HOME)
+
 def init_schedule():
     with cd(REMOTE_HOME):
         with cd("current"):

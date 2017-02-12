@@ -20,7 +20,7 @@ class UserLog(Base):
     action = Column(String(20))
     created_at = Column(DateTime)
 
-    QUERY_ID = re.compile(r'OLQ-[0-4]{4}')
+    QUERY_ID = re.compile(r'OLQ-[0-9]{4}')
     CODE = '%04d-%04d-%04d'
 
     @classmethod
