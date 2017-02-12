@@ -95,16 +95,17 @@ class Evaluation(Base):
         return [questions[qid] for qid in question_ids]
 
     @classmethod
-    def summary(cls):
+    def user_summary(cls):
         scf = SessionContextFactory()
         with scf.create() as session:
             evaluations = session.query(
-                Evaluation.user_id, Evaluation.query_id,
+                Evaluation.user_id,
+                func.count(func.distinct(Evaluation.query_id)),
                 func.count(), func.sum(case([
                     (Evaluation.vote == True, 1),
                     (Evaluation.vote == False, 0)
                 ]))
                 )\
-                .group_by(Evaluation.user_id, Evaluation.query_id)\
+                .group_by(Evaluation.user_id)\
                 .all()
         return evaluations

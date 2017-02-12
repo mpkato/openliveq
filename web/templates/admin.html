@@ -4,17 +4,43 @@
   <div class="container">
     <div class="row">
       <div class="col-xs-10 col-xs-offset-1">
+        <p class="lead">{{ result | length }} Queries</p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>QID</th>
+                    <th># Users</th>
+                    <th># Done</th>
+                    <th># Not Done</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in result %}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{ cell }}</td>
+                        {% endfor %}
+                        <td>{{ row[1] - row[2] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-10 col-xs-offset-1">
+        <p class="lead">{{ user_result | length }} Users</p>
         <table class="table">
             <thead>
                 <tr>
                     <th>UID</th>
-                    <th>QID</th>
+                    <th># Queries</th>
                     <th># Evals</th>
                     <th># Votes</th>
                 </tr>
             </thead>
             <tbody>
-                {% for row in result %}
+                {% for row in user_result %}
                     <tr>
                         {% for cell in row %}
                             <td>{{ cell }}</td>

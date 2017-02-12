@@ -89,3 +89,16 @@ class TestUserLog(TestApp):
         assert int(match.group(1)) == 1
         assert int(match.group(2)) == 2
         assert int(match.group(3)) == 3
+
+        client = app.test_client()
+        url = '/'
+        for i in range(2):
+            response = client.get(url, follow_redirects=True)
+            url = self.A_HREF.search(response.data.decode()).group(1)
+            time.sleep(2)
+        response = client.get(url, follow_redirects=True)
+        match = self.CODE.search(response.data.decode())
+        assert match is not None
+        assert int(match.group(1)) == 2
+        assert int(match.group(2)) == 3
+        assert int(match.group(3)) == 2

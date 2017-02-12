@@ -11,7 +11,7 @@ class TestBrowser(object):
     A_HREF = re.compile(r'<a [^>]*?href="(.*?)"[^>]*?>')
     QID = re.compile(r'OLQ-[0-9]{4}')
 
-    def test_sample(self):
+    def test_zero_time(self):
         driver = webdriver.Firefox()
         response = driver.get("http://qrel.openliveq.net/")
         btn = driver.find_element_by_css_selector(".btn")

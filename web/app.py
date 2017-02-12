@@ -102,8 +102,9 @@ def admin():
     '''
     Show the administration page
     '''
-    result = Evaluation.summary()
-    return render_template('admin.html', result=result)
+    result = Status.query_summary()
+    user_result = Evaluation.user_summary()
+    return render_template('admin.html', result=result, user_result=user_result)
 
 @app.before_request
 def get_user_cookie():

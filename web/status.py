@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, Index, ForeignKey
-from sqlalchemy import func
+from sqlalchemy import func, case
 from openliveq.db import Base, SessionContextFactory
 from web.query import Query
 from web.user_log import UserLog
@@ -123,3 +123,19 @@ class Status(Base):
                     Status.user_id.in_(user_ids))\
                     .delete(synchronize_session=False)
                 session.commit()
+
+    @classmethod
+    def query_summary(cls):
+        scf = SessionContextFactory()
+        with scf.create() as session:
+            statuses = session.query(
+                Status.query_id,
+                func.count(),
+                func.sum(case([
+                    (Status.is_done == True, 1),
+                    (Status.is_done == False, 0)
+                ]))
+                )\
+                .group_by(Status.query_id)\
+                .all()
+        return statuses
