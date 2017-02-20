@@ -12,11 +12,13 @@ from collections import defaultdict
 import sys, os
 import click
 import requests
+import json
 
 FILES = ['OpenLiveQ-queries-train.tsv', 'OpenLiveQ-queries-test.tsv',
     'OpenLiveQ-questions-train.tsv', 'OpenLiveQ-questions-test.tsv']
 
 SUBMISSION_URL = "http://www.openliveq.net/runs"
+SUBMISSION_URL = "http://localhost:3000/runs"
 
 @click.group(invoke_without_command=True)
 @click.pass_context
@@ -310,5 +312,15 @@ def submit(auth_token, run_file):
     files = {'run_file': run_file}
     headers = { 'Authorization': auth_token }
     result = requests.post(SUBMISSION_URL, files=files, headers=headers)
-    print(result)
-    print(result.content)
+    try:
+        if result.status_code == 200:
+            data = json.loads(result.content.decode())
+            for field in data['errors']:
+                print(field, ', '.join(data['errors'][field]))
+        else:
+            data = json.loads(result.content.decode())
+            for field in data['errors']:
+                print(field, ', '.join(data['errors'][field]))
+    except Exception as e:
+        print(e)
+        print(result.content)
