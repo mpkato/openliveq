@@ -13,6 +13,7 @@ setup(
     install_requires = [
         "click",
         "SQLAlchemy",
+        "requests",
     ],
     tests_require=['pytest'],
     entry_points={

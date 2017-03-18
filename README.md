@@ -7,11 +7,32 @@ and provides the following utilities:
 * Feature extraction (e.g. TF-IDF, BM25, and language model)
 * Some tools for learning to rank by [RankLib](https://sourceforge.net/p/lemur/wiki/RankLib/)
 
+## Requirements
+- Python 3
+- MeCab
+
 ## Installation
 ```bash
 $ git clone https://github.com/mpkato/openliveq.git
 $ cd openliveq
 $ python setup.py install
+```
+
+## MeCab Installation
+
+MeCab is required to process Japanese texts.
+
+### Ubuntu
+```bash
+sudo aptitude install -y mecab libmecab-dev mecab-ipadic-utf8
+pip install mecab-python3
+```
+
+An additional dictionary (mecab-ipadic-neologd) can be installed as follows:
+```bash
+git clone --depth 1 https://github.com/neologd/mecab-ipadic-neologd.git
+cd mecab-ipadic-neologd && sudo ./bin/install-mecab-ipadic-neologd -y
+sudo sed -i 's/^dicdir.*/dicdir=\/usr\/lib\/mecab\/dic\/mecab-ipadic-neologd/g' /etc/mecabrc
 ```
 
 ## Example
@@ -34,34 +55,76 @@ OpenLiveQ-questions-test.tsv  OpenLiveQ-queries-test.tsv    OpenLiveQ-question-d
 
 # load the data into a SQLite3 database
 $ openliveq load data/OpenLiveQ-question-data.tsv \
-> data/OpenLiveQ-questions-train.tsv
+> data/OpenLiveQ-clickthrough.tsv
 
     question_file:     data/OpenLiveQ-question-data.tsv
-    clickthrough_file: data/OpenLiveQ-questions-train.tsv
+    clickthrough_file: data/OpenLiveQ-clickthrough.tsv
 
-xxxx questions loaded
-xxxx clickthroughs loaded
+1967274 questions loaded
+440163 clickthroughs loaded
+
+# data validation
+$ openliveq valdb
+DB Validation
+OK
+
+# file validation
+$ openliveq valfiles data
+File Validation
+data/OpenLiveQ-queries-train.tsv
+data/OpenLiveQ-queries-test.tsv
+data/OpenLiveQ-questions-train.tsv
+data/OpenLiveQ-questions-test.tsv
+OK
+
+# parse the entire collection to obtain some statistics such as DF
+$ openliveq parse data/OpenLiveQ-collection.json
+
+output_file:         collection.json
+
+...
+
+The entire collection has been parsed
+	The number of documents: 1967274
+	The number of unique words: 1114773
+	The number of words: 250871848    
 
 # extract features from query-question pairs
-$ openliveq feature data/OpenLiveQ-questions-train.tsv \
+$ openliveq feature data/OpenLiveQ-queries-train.tsv \
 > data/OpenLiveQ-questions-train.tsv \
+> data/OpenLiveQ-collection.json \
 > data/OpenLiveQ-features-train.tsv
+
 query_file:          data/OpenLiveQ-questions-train.tsv
 query_question_file: data/OpenLiveQ-questions-train.tsv
+collection_file:     data/OpenLiveQ-collection.json
 output_file:         data/OpenLiveQ-features-train.tsv
 
 Loading queries and questions ...
 
+The collection statistics:
+	The number of documents: 1967274
+	The number of unique words: 1114773
+	The number of words: 250871848
+
 Extracting features ...
 
-$ openliveq feature data/OpenLiveQ-questions-test.tsv \
+$ openliveq feature data/OpenLiveQ-queries-test.tsv \
 > data/OpenLiveQ-questions-test.tsv \
+> data/OpenLiveQ-collection.json \
 > data/OpenLiveQ-features-test.tsv
+
 query_file:          data/OpenLiveQ-questions-test.tsv
 query_question_file: data/OpenLiveQ-questions-test.tsv
+collection_file:     data/OpenLiveQ-collection.json
 output_file:         data/OpenLiveQ-features-test.tsv
 
 Loading queries and questions ...
+
+The collection statistics:
+	The number of documents: 1967274
+	The number of unique words: 1114773
+	The number of words: 250871848
 
 Extracting features ...
 
@@ -125,6 +188,50 @@ See our homepage for the file formats: [NTCIR-13 OpenLiveQ](http://www.openliveq
 
 This step is necesaary before running the other commands, but only once.
 
+### valdb
+```bash
+Usage: openliveq valdb [OPTIONS]
+
+  DB validation of the OpenLiveQ data
+
+Options:
+  --help  Show this message and exit.
+```
+This command validates question and clickthrough data stored in the SQLite database. This command is optional.
+
+### valfiles
+```bash
+Usage: openliveq valfiles [OPTIONS] DATA_DIR
+
+  File validation of the OpenLiveQ data
+
+  Arguments:
+      DATA_DIR:          path to the OpenLiveQ data directory
+
+Options:
+  --help  Show this message and exit.
+```
+This command validates query and question files in a directory.
+This command is optional.
+
+### parse
+```bash
+Usage: openliveq parse [OPTIONS] OUTPUT_FILE
+
+  Parse the entire corpus
+
+  Arguments:
+      OUTPUT_FILE:    path to the output file
+
+Options:
+  -v, --verbose  increase verbosity.
+  --help         Show this message and exit.
+```
+This command parses the entire collection to obtain some statistics such as DF,
+and store them into `OUTPUT_FILE`.
+This command should be executed before `feature` command,
+and `OUTPUT_FILE` should be used as an argument for `feature` command.
+
 ### feature
 ```bash
 Usage: openliveq feature [OPTIONS] QUERY_FILE QUERY_QUESTION_FILE OUTPUT_FILE
@@ -134,6 +241,7 @@ Usage: openliveq feature [OPTIONS] QUERY_FILE QUERY_QUESTION_FILE OUTPUT_FILE
   Arguments:
       QUERY_FILE:          path to the query file
       QUERY_QUESTION_FILE: path to the file of query and question IDs
+      COLLECTION_FILE:     path to the output file of the 'parse' command
       OUTPUT_FILE:         path to the output file
 
 Options:

@@ -92,4 +92,13 @@ ENV/
 *.jar
 
 # DB files
-*.sqlite3
+*.sqlite3*
+
+# data dir
+/data
+
+# .dat files
+*.dat
+
+# .json files
+*.json
