@@ -7,11 +7,32 @@ and provides the following utilities:
 * Feature extraction (e.g. TF-IDF, BM25, and language model)
 * Some tools for learning to rank by [RankLib](https://sourceforge.net/p/lemur/wiki/RankLib/)
 
+## Requirements
+- Python 3
+- MeCab
+
 ## Installation
 ```bash
 $ git clone https://github.com/mpkato/openliveq.git
 $ cd openliveq
 $ python setup.py install
+```
+
+## MeCab Installation
+
+MeCab is required to process Japanese texts.
+
+### Ubuntu
+```bash
+sudo aptitude install -y mecab libmecab-dev mecab-ipadic-utf8
+pip install mecab-python3
+```
+
+An additional dictionary (mecab-ipadic-neologd) can be installed as follows:
+```bash
+git clone --depth 1 https://github.com/neologd/mecab-ipadic-neologd.git
+cd mecab-ipadic-neologd && sudo ./bin/install-mecab-ipadic-neologd -y
+sudo sed -i 's/^dicdir.*/dicdir=\/usr\/lib\/mecab\/dic\/mecab-ipadic-neologd/g' /etc/mecabrc
 ```
 
 ## Example
@@ -34,10 +55,10 @@ OpenLiveQ-questions-test.tsv  OpenLiveQ-queries-test.tsv    OpenLiveQ-question-d
 
 # load the data into a SQLite3 database
 $ openliveq load data/OpenLiveQ-question-data.tsv \
-> data/OpenLiveQ-questions-train.tsv
+> data/OpenLiveQ-clickthrough.tsv
 
     question_file:     data/OpenLiveQ-question-data.tsv
-    clickthrough_file: data/OpenLiveQ-questions-train.tsv
+    clickthrough_file: data/OpenLiveQ-clickthrough.tsv
 
 1967274 questions loaded
 440163 clickthroughs loaded
