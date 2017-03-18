@@ -101,34 +101,18 @@ def valdb():
     print('OK')
 
 @main.command(help='''
-    Feature extraction from query-question pairs
+    Parse the entire corpus
 
     \b
     Arguments:
-        QUERY_FILE:          path to the query file
-        QUERY_QUESTION_FILE: path to the file of query and question IDs
-        OUTPUT_FILE:         path to the output file
+        OUTPUT_FILE:    path to the output file
 ''')
-@click.argument('query_file', required=True, type=click.File('r'))
-@click.argument('query_question_file', required=True, type=click.File('r'))
 @click.argument('output_file', required=True, type=click.File('w'))
 @click.option('--verbose', '-v', is_flag=True, help="increase verbosity.")
-def feature(query_file, query_question_file, output_file, verbose):
+def parse(output_file, verbose):
     print("""
-    query_file:          %s
-    query_question_file: %s
     output_file:         %s
-    """ % (query_file.name, query_question_file.name, output_file.name))
-
-    print("Loading queries and questions ...")
-    queries = Query.load(query_file)
-    queries = {q.query_id: q for q in queries}
-    query_file.close()
-    qqs = QueryQuestion.load(query_question_file)
-    question_ids = defaultdict(list)
-    for qq in qqs:
-        question_ids[qq.query_id].append(qq.question_id)
-    query_question_file.close()
+    """ % output_file.name)
 
     ff = FeatureFactory()
     collection = Collection()
@@ -144,7 +128,63 @@ def feature(query_file, query_question_file, output_file, verbose):
                 collection.add(ws)
     print()
 
+    collection.dump(output_file)
+    output_file.close()
+    print("The entire collection has been parsed")
+    with open(output_file.name) as f:
+        collection = Collection.load(f)
+        print("\tThe number of documents: %d" % collection.dn)
+        print("\tThe number of unique words: %d" % len(collection.df))
+        print("\tThe number of words: %d" % collection.cn)
+
+
+@main.command(help='''
+    Feature extraction from query-question pairs
+
+    \b
+    Arguments:
+        QUERY_FILE:          path to the query file
+        QUERY_QUESTION_FILE: path to the file of query and question IDs
+        COLLECTION_FILE:     path to the output file of the 'parse' command
+        OUTPUT_FILE:         path to the output file
+''')
+@click.argument('query_file', required=True, type=click.File('r'))
+@click.argument('query_question_file', required=True, type=click.File('r'))
+@click.argument('collection_file', required=True, type=click.File('r'))
+@click.argument('output_file', required=True, type=click.File('w'))
+@click.option('--verbose', '-v', is_flag=True, help="increase verbosity.")
+def feature(query_file, query_question_file, collection_file,
+    output_file, verbose):
+    print("""
+    query_file:          %s
+    query_question_file: %s
+    collection_file:     %s
+    output_file:         %s
+    """ % (query_file.name, query_question_file.name, collection_file.name,
+        output_file.name))
+
+    print("Loading queries and questions ...")
+    queries = Query.load(query_file)
+    queries = {q.query_id: q for q in queries}
+    query_file.close()
+    qqs = QueryQuestion.load(query_question_file)
+    question_ids = defaultdict(list)
+    for qq in qqs:
+        question_ids[qq.query_id].append(qq.question_id)
+    query_question_file.close()
+    print()
+
+    collection = Collection.load(collection_file)
+    collection_file.close()
+    print("The collection statistics:")
+    print("\tThe number of documents: %d" % collection.dn)
+    print("\tThe number of unique words: %d" % len(collection.df))
+    print("\tThe number of words: %d" % collection.cn)
+    print()
+
     print("Extracting features ...")
+    scf = SessionContextFactory(echo=verbose)
+    ff = FeatureFactory()
     with scf.create() as session:
         for idx, query_id in enumerate(sorted(queries.keys())):
             print('\tProcessing questions for query %s' % query_id)

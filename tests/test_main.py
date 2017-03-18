@@ -4,6 +4,7 @@ from math import exp
 import pytest
 import tempfile
 import os
+import json
 import openliveq as olq
 from openliveq.db import DBPATH, SessionContextFactory
 
@@ -57,10 +58,9 @@ class TestMain(object):
         assert result.exit_code != 0
         assert isinstance(result.exception, RuntimeError)
 
-    def test_feature(self, query_filepath, question_filepath, 
-        query_question_filepath, clickthrough_filepath):
+    def test_parse(self, question_filepath, clickthrough_filepath):
         runner = CliRunner()
-        result = runner.invoke(main, ["feature"])
+        result = runner.invoke(main, ["parse"])
         assert result.exit_code == 2
         assert result.output.startswith('Usage:')
         assert "Missing" in result.output
@@ -72,8 +72,36 @@ class TestMain(object):
         output = tempfile.NamedTemporaryFile()
         filename = output.name
         output.close()
+        result = runner.invoke(main, ["parse", filename])
+        assert result.exit_code == 0
+        with open(filename) as f:
+            data = olq.Collection.load(f)
+        assert data.dn == 5
+
+    def test_feature(self, query_filepath, question_filepath,
+        query_question_filepath, clickthrough_filepath):
+        runner = CliRunner()
+        result = runner.invoke(main, ["feature"])
+        assert result.exit_code == 2
+        assert result.output.startswith('Usage:')
+        assert "Missing" in result.output
+
+        result = runner.invoke(main, ["load",
+            question_filepath, clickthrough_filepath])
+        assert result.exit_code == 0
+
+        output = tempfile.NamedTemporaryFile()
+        collection_filename = output.name
+        output.close()
+        result = runner.invoke(main, ["parse", collection_filename])
+        assert result.exit_code == 0
+
+        output = tempfile.NamedTemporaryFile()
+        filename = output.name
+        output.close()
         result = runner.invoke(main, ["feature",
-            query_filepath, query_question_filepath, filename])
+            query_filepath, query_question_filepath,
+            collection_filename, filename])
         assert result.exit_code == 0
         with open(filename) as f:
             lines = f.readlines()
@@ -93,11 +121,19 @@ class TestMain(object):
     def test_feature_no_data(self, query_filepath, question_filepath, 
         query_question_filepath, clickthrough_filepath):
         runner = CliRunner()
+
+        output = tempfile.NamedTemporaryFile()
+        collection_filename = output.name
+        output.close()
+        result = runner.invoke(main, ["parse", collection_filename])
+        assert result.exit_code == 0
+
         output = tempfile.NamedTemporaryFile()
         filename = output.name
         output.close()
         result = runner.invoke(main, ["feature",
-            query_filepath, query_question_filepath, filename])
+            query_filepath, query_question_filepath,
+            collection_filename, filename])
         assert result.exit_code != 0
         assert "No such " in str(result.exception)
         assert isinstance(result.exception, RuntimeError)
@@ -116,7 +152,6 @@ class TestMain(object):
         probs = {}
         with open(filename) as f:
             for line in f:
-                print(line)
                 ls = [l.strip() for l in line.split("\t")]
                 probs[tuple(ls[:2])] = float(ls[-1])
 
