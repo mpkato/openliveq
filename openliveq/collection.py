@@ -21,11 +21,14 @@ class Collection(object):
         '''
         Add a question
         '''
+        words = set()
         for label in self.DOC_FROM:
+            words = words | set(wordsets[label].keys())
             for w in set(wordsets[label].keys()):
-                self.df[w] += 1
                 self.cf[w] += wordsets[label][w]
                 self.cn += wordsets[label][w]
+        for w in words:
+            self.df[w] += 1
         self.dn += 1
 
     def dump(self, f):
