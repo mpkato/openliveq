@@ -232,8 +232,9 @@ def relevance(output_file, sigma, max_grade, topk, verbose):
     for query_id in sorted(res_per_q):
         scores = [s for ids, s in res_per_q[query_id]]
         max_score = max(scores)
-        for ids, s in res_per_q[query_id]:
-            score = int(s / max_score * max_grade) # normalization
+        for ids, score in res_per_q[query_id]:
+            if max_score > 0:
+                score = int(score / max_score * max_grade) # normalization
             output_file.write("\t".join(list(ids) + [str(score)]) + "\n")
     output_file.close()
 
