@@ -77,26 +77,54 @@ data/OpenLiveQ-questions-train.tsv
 data/OpenLiveQ-questions-test.tsv
 OK
 
+# parse the entire collection to obtain some statistics such as DF
+$ openliveq parse data/OpenLiveQ-collection.json
+
+output_file:         collection.json
+
+...
+
+The entire collection has been parsed
+	The number of documents: 1967274
+	The number of unique words: 1114773
+	The number of words: 250871848    
+
 # extract features from query-question pairs
 $ openliveq feature data/OpenLiveQ-queries-train.tsv \
 > data/OpenLiveQ-questions-train.tsv \
+> data/OpenLiveQ-collection.json \
 > data/OpenLiveQ-features-train.tsv
+
 query_file:          data/OpenLiveQ-questions-train.tsv
 query_question_file: data/OpenLiveQ-questions-train.tsv
+collection_file:     data/OpenLiveQ-collection.json
 output_file:         data/OpenLiveQ-features-train.tsv
 
 Loading queries and questions ...
+
+The collection statistics:
+	The number of documents: 1967274
+	The number of unique words: 1114773
+	The number of words: 250871848
 
 Extracting features ...
 
 $ openliveq feature data/OpenLiveQ-queries-test.tsv \
 > data/OpenLiveQ-questions-test.tsv \
+> data/OpenLiveQ-collection.json \
 > data/OpenLiveQ-features-test.tsv
+
 query_file:          data/OpenLiveQ-questions-test.tsv
 query_question_file: data/OpenLiveQ-questions-test.tsv
+collection_file:     data/OpenLiveQ-collection.json
 output_file:         data/OpenLiveQ-features-test.tsv
 
 Loading queries and questions ...
+
+The collection statistics:
+	The number of documents: 1967274
+	The number of unique words: 1114773
+	The number of words: 250871848
 
 Extracting features ...
 
@@ -186,6 +214,24 @@ Options:
 This command validates query and question files in a directory.
 This command is optional.
 
+### parse
+```bash
+Usage: openliveq parse [OPTIONS] OUTPUT_FILE
+
+  Parse the entire corpus
+
+  Arguments:
+      OUTPUT_FILE:    path to the output file
+
+Options:
+  -v, --verbose  increase verbosity.
+  --help         Show this message and exit.
+```
+This command parses the entire collection to obtain some statistics such as DF,
+and store them into `OUTPUT_FILE`.
+This command should be executed before `feature` command,
+and `OUTPUT_FILE` should be used as an argument for `feature` command.
+
 ### feature
 ```bash
 Usage: openliveq feature [OPTIONS] QUERY_FILE QUERY_QUESTION_FILE OUTPUT_FILE
@@ -195,6 +241,7 @@ Usage: openliveq feature [OPTIONS] QUERY_FILE QUERY_QUESTION_FILE OUTPUT_FILE
   Arguments:
       QUERY_FILE:          path to the query file
       QUERY_QUESTION_FILE: path to the file of query and question IDs
+      COLLECTION_FILE:     path to the output file of the 'parse' command
       OUTPUT_FILE:         path to the output file
 
 Options:

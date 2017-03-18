@@ -99,3 +99,6 @@ ENV/
 
 # .dat files
 *.dat
+
+# .json files
+*.json
