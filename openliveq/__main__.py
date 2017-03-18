@@ -17,9 +17,6 @@ import json
 FILES = ['OpenLiveQ-queries-train.tsv', 'OpenLiveQ-queries-test.tsv',
     'OpenLiveQ-questions-train.tsv', 'OpenLiveQ-questions-test.tsv']
 
-SUBMISSION_URL = "http://www.openliveq.net/runs"
-SUBMISSION_URL = "http://localhost:3000/runs"
-
 @click.group(invoke_without_command=True)
 @click.pass_context
 def main(ctx):
@@ -333,34 +330,3 @@ def rank(feature_file, score_file, output_file):
         for question_id in ranked:
             output_file.write("\t".join((query_id, question_id)) + "\n")
     output_file.close()
-
-@main.command(help='''
-    Submit a run
-
-    \b
-    Arguments:
-        AUTH_TOKEN:   authorization token provided by the organizers
-        RUN_FILE:     path to the run file
-''')
-@click.argument('auth_token', required=True, type=str)
-@click.argument('run_file', required=True, type=click.File('rb'))
-def submit(auth_token, run_file):
-    print("""
-    run_file:     %s
-    """ % (run_file.name, ))
-
-    files = {'run_file': run_file}
-    headers = { 'Authorization': auth_token }
-    result = requests.post(SUBMISSION_URL, files=files, headers=headers)
-    try:
-        if result.status_code == 200:
-            data = json.loads(result.content.decode())
-            for field in data['errors']:
-                print(field, ', '.join(data['errors'][field]))
-        else:
-            data = json.loads(result.content.decode())
-            for field in data['errors']:
-                print(field, ', '.join(data['errors'][field]))
-    except Exception as e:
-        print(e)
-        print(result.content)

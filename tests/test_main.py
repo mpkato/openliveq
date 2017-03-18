@@ -232,8 +232,3 @@ class TestMain(object):
     def score_filepath(self):
         return os.path.join(os.path.dirname(__file__),
             "fixtures", "sample_scores.tsv")
-
-    @pytest.fixture
-    def run_filepath(self):
-        return os.path.join(os.path.dirname(__file__),
-            "fixtures", "run.tsv")
