@@ -7,12 +7,12 @@ class TestCollection(TestBase):
     def test_df(self, c):
         result = c.df
         assert result["社会保険事務所"] == 1
-        assert result["国民年金"] == 8
+        assert result["国民年金"] == 4
 
     def test_cf(self, c):
         result = c.cf
         assert result["社会保険事務所"] > 1
-        assert result["国民年金"] > 8
+        assert result["国民年金"] > 4
 
     @pytest.fixture
     def c(self, parsed_questions):
