@@ -92,7 +92,7 @@ ENV/
 *.jar
 
 # DB files
-*.sqlite3
+*.sqlite3*
 
 # data dir
 /data
