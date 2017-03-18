@@ -134,7 +134,7 @@ def _lm_pwc(w, c):
     '''
     Add 1 for smoothing
     '''
-    return float(c.cf[w] + 1.0) / (c.cn + len(c.df))
+    return float(c.cf.get(w, 0.0) + 1.0) / (c.cn + len(c.df))
 
 def lm_dir(q, d, c, mu=50.0):
     """
