@@ -55,7 +55,9 @@ def log_idf_sum(q, d, c):
     """
     result = 0.0
     for w in set(q) & set(d):
-        result += log(log(float(c.dn) / c.df[w]))
+        logval = log(float(c.dn) / c.df[w])
+        if logval > 0:
+            result += log(logval)
     return result
 
 def icf_sum(q, d, c):
