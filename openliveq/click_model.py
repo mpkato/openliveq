@@ -18,9 +18,10 @@ class ClickModel(object):
     def estimate(cls, ctrs, sigma=10.0, topk=10):
         result = {}
         for ctr in ctrs:
-            eprob = cls._eprob(ctr.rank, sigma)
-            aprob = min([1.0, ctr.ctr / eprob])
-            result[(ctr.query_id, ctr.question_id)] = aprob
+            if ctr.rank <= topk:
+                eprob = cls._eprob(ctr.rank, sigma)
+                aprob = min([1.0, ctr.ctr / eprob])
+                result[(ctr.query_id, ctr.question_id)] = aprob
         return result
 
     @classmethod
