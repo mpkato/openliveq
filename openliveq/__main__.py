@@ -16,6 +16,8 @@ import json
 
 FILES = ['OpenLiveQ-queries-train.tsv', 'OpenLiveQ-queries-test.tsv',
     'OpenLiveQ-questions-train.tsv', 'OpenLiveQ-questions-test.tsv']
+FILES2 = ['OpenLiveQ2-queries-train.tsv', 'OpenLiveQ2-queries-test.tsv',
+    'OpenLiveQ2-questions-train.tsv', 'OpenLiveQ2-questions-test.tsv']
 
 @click.group(invoke_without_command=True)
 @click.pass_context
@@ -79,14 +81,20 @@ def valfiles(data_dir):
         sys.exit(0)
     print(Validation.file_validation.__doc__.strip())
 
+    olq2_flag = False
     for filename in FILES:
         filepath = os.path.join(data_dir, filename)
         if not os.path.exists(filepath):
-            print("'%s' does not exist" % filepath)
-            sys.exit(0)
+            for filename2 in FILES2:
+                filepath2 = os.path.join(data_dir, filename2)
+                if not os.path.exists(filepath2):
+                    print("Neither '%s' nor '%s' exists" % (filepath, filepath2))
+                    sys.exit(0)
+            olq2_flag = True
+            break
 
     Validation.file_validation(*[os.path.join(data_dir, filename)
-        for filename in FILES])
+        for filename in (FILES2 if olq2_flag else FILES)])
     print('OK')
 
 @main.command(help='''
